@@ -126,3 +126,19 @@ export function backtest(P, i, absatzIst = true) {
   ];
   return { r, zeilen, inSample: i === 0 };
 }
+
+// Berichtswerte der Periode unter den Schlüsseln des Modellergebnisses (exakt wie im Sammelbericht)
+export function istWerte(B) {
+  const o = {}, put = (k, t, f = 1) => { const v = g(B, t); if (v != null && !isNaN(v)) o[k] = v * f; };
+  [['absatz', 't01_absatz'], ['fert_ist', 't03_fm'], ['kap', 't03_kap_ohne'], ['einsetzbar', 't03_einsetzbar'], ['umsatz', 't11_umsatz'],
+    ['k_es', 't07_es'], ['k_bs', 't07_bs'], ['k_lohn', 't07_lohn'], ['k_eek', 't07_eek'], ['k_sp', 't07_sozial'], ['k_pnk', 't07_pnk'], ['k_pens', 't07_pens'],
+    ['k_afa_anl', 't07_afa_anl'], ['k_afa_umw', 't07_afa_umw'], ['k_fix', 't07_fix'], ['k_ih', 't07_ih'], ['k_po', 't07_po'], ['k_umw', 't07_umw'], ['k_nach', 't07_nach'],
+    ['k_lager', 't07_lager'], ['k_werb', 't07_werb'], ['k_fue', 't07_fe'], ['k_transp', 't07_transp'], ['hk_stk', 't09s_hk'], ['sk_stk', 't09s_sk'], ['be', 't11_be'],
+    ['zins_kl', 't11_zins'], ['steuern', 't11_steuern'], ['pue', 't11_pue'], ['kasse', 't15_kasse'], ['ueberz', 't15_ueberz'], ['bi_ford', 't15_ford'], ['es_end_val', 't15_mat'],
+    ['fe_end_val', 't15_fe'], ['bi_masch', 't15_masch'], ['bi_ek', 't15_ek'], ['bi_akt', 't15_bsa'], ['ez_akt', 't12_ez_akt'], ['ez_sum', 't12_ez_sum'], ['az_mat', 't12_az_mat'],
+    ['az_pers', 't12_az_pers'], ['az_sum', 't12_az_sum'], ['cf_trad', 't14_tcf'], ['ocf', 't14_ocf'], ['fcf', 't14_fcf'], ['hkdu', 't11u_hkdu']].forEach(([k, t]) => put(k, t));
+  put('ekr', 't01_ekr', 0.01); put('db1', 't10_umsatz');
+  if (o.db1 != null) o.db1 = g(B, 't10_umsatz') - g(B, 't10_vmat') - g(B, 't10_vfert') - g(B, 't10_transp');
+  return o;
+}
+
