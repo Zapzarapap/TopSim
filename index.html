@@ -63,6 +63,7 @@ th{font-size:13px;color:var(--mute);font-weight:600;vertical-align:bottom}
 td.note,th.note{text-align:left;white-space:normal;font-size:13px;color:var(--mute);min-width:16em}
 tr.sum td{font-weight:600}
 tr.bad td{background:var(--ybg)}
+tr.chg td{background:var(--tealbg)}
 .pw{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .pw div{font-size:13px;color:var(--mute)}.pw b{display:block;font-size:18px;color:var(--ink);white-space:nowrap}
 .note{font-size:13px;color:var(--mute)}
@@ -104,9 +105,9 @@ tr.bad td{background:var(--ybg)}
     <div class="card"><h3>Planwerte für TOPSIM</h3><div class="pw" id="pw"></div><p class="note"><button id="copy" type="button" style="min-height:36px;margin-top:8px">Planwerte kopieren</button> <span id="copied"></span></p></div>
     <div class="card">
       <div class="tabs" role="tablist" id="tabs">
-        <button role="tab" data-t="kpi" aria-selected="true">Kennzahlen</button>
+        <button role="tab" data-t="pb" aria-selected="true">Planberichte</button>
         <button role="tab" data-t="wirk">Wirkung je Entscheidung</button>
-        <button role="tab" data-t="rech">Planrechnung</button>
+        <button role="tab" data-t="rech">Anlagen und Personal</button>
         <button role="tab" data-t="aus">Ausblick</button>
         <button role="tab" data-t="bt">Backtest</button>
       </div>
@@ -223,7 +224,53 @@ const KPI=[['nachfrage','Nachfrage (Schätzung)','Stück',0],['absatz','Absatz M
  ['ocf','Operativer Cashflow','MEUR',2],['kasse','Kassenendbestand','MEUR',2],['ueberz','Überziehungskredit','MEUR',2],['ekq','EK-Quote','%',1],['fe_end','Lager Fertigprodukte','Stück',0],['es_end','Lager Einsatzstoffe','Einh.',0],['umw_ind','Umweltindikator','Index',2],['umw_abg','Umweltabgabe','MEUR',2],['pers_gesamt','Personal gesamt','MA',0]];
 const fmtK=(v,u,d)=>u==='%'?pct(v,d):nf(v,d)+(u==='MEUR'?' MEUR':'');
 const dK=(v,u,d)=>u==='%'?sg(v*100,d)+' %-P.':sg(v,d);
-let cur, base, sc, tabSel='kpi';
+
+// Planberichte in TOPSIM-Gliederung: [Bezeichnung, Wert (Schlüssel oder Funktion), Einheit, Nachkommastellen, besser wenn (+1 höher, -1 niedriger, 0 neutral)]
+const PB=[
+ ['Absatz und Umsatz (TNB01/02/10)',[
+  ['Nachfrage Modell','nachfrage_modell','Stück',0,1],['davon Preiseffekt (Faktor)','preiseffekt','',3,0],['davon Werbeeffekt','werbeeffekt','Stück',0,0],['davon Vertriebseffekt','vertriebseffekt','Stück',0,0],
+  ['Nachfrage (verwendet)','nachfrage','Stück',0,1],['Absatz Markt 1','absatz','Stück',0,1],['Lieferung Großabnehmer','ga_lief','Stück',0,0],['Lieferung Ausschreibung','aus_lief','Stück',0,0],['Nicht lieferbar','ngn','Stück',0,-1],
+  ['Umsatz Markt 1','umsatz_m1','MEUR',2,1],['Umsatz Großabnehmer','umsatz_ga','MEUR',2,1],['Umsatz Ausschreibung','umsatz_aus','MEUR',2,1],['Umsatz gesamt','umsatz','MEUR',2,1]]],
+ ['Fertigung (TNB03)',[
+  ['Anlagen im Einsatz',r=>r.anl.length,'Stück',0,0],['Normale Kapazität','kap_norm','Stück',0,0],['Verfügbare Kapazität','kap','Stück',0,1],['Kapazität mit Überstunden','kap_ues','Stück',0,1],
+  ['Personal Fertigung Ende','pers_end','MA',0,0],['Fehlzeiten','fehl','MA',0,-1],['Einsetzbares Personal','einsetzbar','MA',0,0],['Produktivität je MA','prod','Stück',2,1],['Personalkapazität','pers_kap','Stück',0,1],
+  ['Geplante Fertigungsmenge','fm_plan','Stück',0,0],['Tatsächliche Fertigung','fert_ist','Stück',0,0],['Nicht fertigbar','fert_fehl','Stück',0,-1],['Auslastung Anlagen','ausl_anl','%',1,0],['Auslastung Personal','ausl_pers','%',1,0],
+  ['Überstunden (MA-Äquivalent)','ot_ma','MA',1,-1],['Zusatzschicht','zusatzschicht','MEUR',2,-1],['Umweltindex Anlagen','umw_anl','Index',2,1],['Umweltbelastungsindikator','umw_ind','Index',2,1],['Umweltabgabe','umw_abg','MEUR',2,-1]]],
+ ['Lager (TNB05)',[
+  ['Einsatzstoffe Anfang','es_anf','Einh.',0,0],['Einkauf','einkauf','Einh.',0,0],['Einkaufspreis','ek_preis','EUR',2,-1],['Nachlieferung (+20 %)','nachl','Einh.',0,-1],['Verbrauch','bedarf','Einh.',0,0],
+  ['Einsatzstoffe Ende','es_end','Einh.',0,0],['Einsatzstoffe Ende (Wert)','es_end_val','MEUR',2,0],['Fertigprodukte Anfang','fe_anf_qty','Stück',0,0],['Abgang an Vertrieb','fe_abg','Stück',0,0],
+  ['Fertigprodukte Ende','fe_end','Stück',0,0],['Fertigprodukte Ende (Wert)','fe_end_val','MEUR',2,0],['Lagerkosten','k_lager','MEUR',2,-1]]],
+ ['Personal (TNB06)',[
+  ...['Einkauf','Verwaltung','Fertigung','F&E','Vertrieb'].flatMap((l,j)=>[[`${l}: Endbestand`,r=>r.P[j].end,'MA',0,0],[`${l}: Einst./Entl.`,r=>r.P[j].einst-r.P[j].entl,'MA',0,0],[`${l}: Kosten`,r=>r.P[j].sum,'MEUR',2,-1]]),
+  ['Personal gesamt','pers_gesamt','MA',0,0],['Personalkosten gesamt','pers_kosten','MEUR',2,-1]]],
+ ['Kostenarten (TNB07)',[...M.KOSTEN.map(([k,l])=>[l,k,'MEUR',2,-1]),['Summe Kosten','k_sum','MEUR',2,-1]]],
+ ['Kostenträger (TNB09)',[
+  ['Einkauf (Einzel + Gemein)',r=>r.E[0]+r.G[0],'MEUR',2,-1],['Fertigung (Einzel + Gemein)',r=>r.E[1]+r.G[1],'MEUR',2,-1],['Herstellkosten','hk','MEUR',2,-1],['Herstellkosten je Stück','hk_stk','EUR',2,-1],
+  ['Herstellkosten des Umsatzes','hkdu','MEUR',2,0],['F&E','kost_fue','MEUR',2,-1],['Vertrieb','kost_vt','MEUR',2,-1],['Verwaltung','kost_vw','MEUR',2,-1],['Selbstkosten','sk','MEUR',2,0],['Selbstkosten je Stück','sk_stk','EUR',2,-1]]],
+ ['Deckungsbeiträge (TNB10)',[['DB I','db1','MEUR',2,1],['DB II','db2','MEUR',2,1],['DB III','db3','MEUR',2,1],['DB IV','db4','MEUR',2,1],['DB V = Betriebsergebnis','db5','MEUR',2,1],
+  ['DB I je Stück',r=>r.fe_abg?r.db1*1e6/r.fe_abg:0,'EUR',2,1]]],
+ ['GuV (TNB11)',[['Umsatzerlöse','umsatz','MEUR',2,1],['Bestandsveränderung','bestv','MEUR',2,0],['Materialaufwand','g_mat','MEUR',2,-1],['Personalaufwand','g_pers','MEUR',2,-1],['Abschreibungen','g_afa','MEUR',2,-1],
+  ['Sonstiger Aufwand','g_sonst','MEUR',2,-1],['Betriebsergebnis','be','MEUR',2,1],['Wertpapiererträge','wp_ertr','MEUR',2,1],['Zinsen Kredite','zins_kl','MEUR',2,-1],['Zinsen Überziehung','zins_ue','MEUR',2,-1],
+  ['Gewinn vor Steuern','egt','MEUR',2,1],['Steuern','steuern','MEUR',2,-1],['Periodenüberschuss','pue','MEUR',2,1],['Dividende','div','MEUR',2,0],['Gewinnvortrag neu','vortrag_neu','MEUR',2,1]]],
+ ['Liquidität (TNB12)',[['Kassenanfang','l_anf','MEUR',2,0],['Einz. Umsatz akt. Periode','ez_akt','MEUR',2,1],['Einz. Umsatz Vorperiode','ez_vp','MEUR',2,0],['Verkauf Wertpapiere','ez_wp','MEUR',2,0],['Zinserträge','wp_ertr','MEUR',2,1],
+  ['Desinvestitionen','resterloes','MEUR',2,0],['Aufnahme Kredite','ez_kredit','MEUR',2,0],['Überziehungskredit','ueberz','MEUR',2,-1],['Summe Einzahlungen','ez_sum','MEUR',2,0],
+  ['Ausz. Material','az_mat','MEUR',2,-1],['Ausz. Personal (ohne BAV)','az_pers','MEUR',2,-1],['Ausz. sonstige Aufwendungen','az_sonst','MEUR',2,-1],['Rückzahlung Kredite','az_tilg','MEUR',2,0],['Zinsen Kredite','zins_kl','MEUR',2,-1],
+  ['Kauf Anlagen','az_inv','MEUR',2,0],['Kauf Wertpapiere','az_wp','MEUR',2,0],['Kauf Umweltanlagen','az_umw','MEUR',2,0],['Dividende','div','MEUR',2,0],['Steuern','steuern','MEUR',2,-1],['Zinsen Überziehung','zins_ue','MEUR',2,-1],
+  ['Summe Auszahlungen','az_sum','MEUR',2,0],['Kassenende','kasse','MEUR',2,0],['Zusätzlicher Kredit nötig','kreditbedarf','MEUR',2,-1]]],
+ ['Cashflow (TNB14)',[['Periodenüberschuss','pue','MEUR',2,1],['+ Abschreibungen','g_afa','MEUR',2,0],['+ Pensionsrückstellungen','k_pens','MEUR',2,0],['Traditioneller Cashflow','cf_trad','MEUR',2,1],
+  ['± Vorräte Material','cf_mat','MEUR',2,1],['± Vorräte Fertigprodukte','cf_fe','MEUR',2,1],['± Forderungen','cf_ford','MEUR',2,1],['A. Operativer Cashflow','ocf','MEUR',2,1],['B. Investitionen','icf','MEUR',2,0],
+  ['C. Finanzierung','fcfin','MEUR',2,0],['Veränderung Kasse','d_kasse','MEUR',2,0],['Free Cashflow','fcf','MEUR',2,1]]],
+ ['Bilanz (TNB15)',[['Grundstücke und Bauten','bi_grund','MEUR',2,0],['Maschinen','bi_masch','MEUR',2,0],['Materialien','es_end_val','MEUR',2,0],['Fertige Erzeugnisse','fe_end_val','MEUR',2,0],['Forderungen','bi_ford','MEUR',2,0],
+  ['Wertpapiere',()=>+S.F.wp||0,'MEUR',2,0],['Kasse','kasse','MEUR',2,0],['Bilanzsumme','bi_akt','MEUR',2,0],['Eigenkapital','bi_ek','MEUR',2,1],['Pensionsrückstellungen','bi_pens','MEUR',2,0],
+  ['Langfristige Kredite','bi_lang','MEUR',2,0],['Kurzfristige Kredite',()=>+S.F.kurz||0,'MEUR',2,0],['Überziehungskredit','ueberz','MEUR',2,-1]]],
+ ['Kennzahlen (TNB17/18)',[['EK-Rendite','ekr','%',2,1],['Umsatzrendite','ur','%',2,1],['EK-Quote','ekq','%',1,1],['FK-Quote','fkq','%',1,-1],['EBIT','ebit','MEUR',2,1],['EBITDA','ebitda','MEUR',2,1]]]];
+const pv=(r,a)=>typeof a==='function'?a(r):r[a];
+const fmtU=(v,u,d)=>u==='%'?pct(v,d):nf(v,d)+(u==='MEUR'?' MEUR':'');
+const dU=(v,u,d)=>u==='%'?sg(v*100,d)+' %-P.':sg(v,d);
+const tolU=(u,d)=>u==='%'?0.00005:d===0?0.5:0.005;
+const clsG=(v,gd)=>!gd?'':(v*gd>0?'pos':'neg');
+function diffs(rA,rB){ return PB.map(([t,rows])=>[t,rows.map(([l,a,u,d,gd])=>{const v=pv(rB,a)-pv(rA,a);return Math.abs(v)>tolU(u,d)?[l,v,u,d,gd]:null;}).filter(Boolean)]).filter(x=>x[1].length); }
+let cur, base, sc, tabSel='pb';
 
 function render(){
   sc=M.szenarien(D.B,S.F,S.A,S.Q); cur=sc.basis; const B0=baseOf(); base=M.modell(D.B,B0.F,B0.A,B0.Q);
@@ -248,8 +295,8 @@ function render(){
   const L=S.last;
   if(L){ const before=L.res;
     $('lastH').textContent=`Was hat sich geändert? ${L.label}: ${L.from} → ${L.to}`;
-    const items=KPI.map(([k,l,u,d])=>[l,cur[k]-before[k],u,d,k]).filter(x=>Math.abs(x[1])>(x[2]==='%'?0.0005:x[3]===0?0.5:0.005));
-    $('last').innerHTML=items.length?items.map(([l,v,u,d,k])=>`<li><span>${l}</span><b class="${cls(k,v)}">${dK(v,u,d)}</b></li>`).join(''):'<li><span class="mute">keine Wirkung auf die Kennzahlen im Modell</span></li>';
+    const ds=diffs(before,cur);
+    $('last').innerHTML=ds.length?ds.map(([t,rows])=>`<li style="grid-column:1/-1;border:0;padding-top:8px"><b>${t}</b></li>`+rows.map(([l,v,u,d,gd])=>`<li><span>${l}</span><b class="${clsG(v,gd)}">${dU(v,u,d)}</b></li>`).join('')).join(''):'<li><span class="mute">keine Wirkung auf die Planberichte im Modell</span></li>';
     $('lastN').textContent=WIRK[L.k?.replace(/(\d)?_[ABC]$/,'')]||''; $('lastN').style.display=$('lastN').textContent?'':'none';
   }
   $('pw').innerHTML=[['Umsatz Markt 1',nf(cur.umsatz_m1,2)+' MEUR'],['EK-Rendite',nf(cur.ekr*100,2)+' %'],['Operativer Cashflow',nf(cur.ocf,2)+' MEUR'],['Geplanter Absatz',nf(cur.absatz)+' Stück']].map(([l,v])=>`<div>${l}<b>${v}</b></div>`).join('');
@@ -259,8 +306,9 @@ function render(){
 // ---------- Reiter ----------
 function renderTab(){
   const el=$('tab');
-  if(tabSel==='kpi') el.innerHTML=`<div class="scroll"><table><tr><th>Kennzahl</th><th>Basis</th><th>Jetzt</th><th>Δ</th></tr>`+KPI.map(([k,l,u,d])=>{const v=cur[k]-base[k];return `<tr><td>${l}</td><td>${fmtK(base[k],u,d)}</td><td><b>${fmtK(cur[k],u,d)}</b></td><td class="${cls(k,v)}">${Math.abs(v)<1e-6?'–':dK(v,u,d)}</td></tr>`;}).join('')+`</table></div>
-    <p class="note">Grün = besser, rot = schlechter. Basis = Vorbelegung aus den Berichten bzw. „Als Basis merken“.</p>`;
+  if(tabSel==='pb') el.innerHTML=`<p class="note">Alle Berichte der Planperiode in TOPSIM-Gliederung. Basis = Vorbelegung aus den Berichten bzw. „Als Basis merken“. Geänderte Zeilen sind hinterlegt; grün = besser, rot = schlechter.</p>`+
+    PB.map(([t,rows])=>`<h3 style="margin:16px 0 4px;font-size:15px">${t}</h3><div class="scroll"><table><tr><th>Position</th><th>Basis</th><th>Jetzt</th><th>Δ</th></tr>`+rows.map(([l,a,u,d,gd])=>{const b0=pv(base,a),c0=pv(cur,a),v=c0-b0,ch=Math.abs(v)>tolU(u,d);
+      return `<tr class="${ch?'chg':''}"><td>${l}</td><td>${fmtU(b0,u,d)}</td><td><b>${fmtU(c0,u,d)}</b></td><td class="${ch?clsG(v,gd):'mute'}">${ch?dU(v,u,d):'–'}</td></tr>`;}).join('')+'</table></div>').join('');
   if(tabSel==='wirk') el.innerHTML=wirkung();
   if(tabSel==='rech') el.innerHTML=rechnung(cur);
   if(tabSel==='aus') el.innerHTML=ausblickHtml();
@@ -299,8 +347,7 @@ function rechnung(r){
     z('Eigenkapital',r.bi_ek)+z('Pensionsrückstellungen',r.bi_pens)+z('Langfr. Verbindlichkeiten',r.bi_lang)+z('Kurzfr. Verbindlichkeiten',+S.F.kurz||0)+z('Überziehungskredit',r.ueberz)+z('Passiva',r.bi_pas,'sum');
   const anl=`<tr><th>Anlage</th><th>Kapazität</th><th>Verfügb.</th><th>AfA</th><th>RBW Ende</th><th>Fixk.</th><th>Umw.</th></tr>`+r.anl.map((a,i)=>`<tr><td>Typ ${a.t}${a.neu?' (neu)':''}</td><td>${nf(a.kap)}</td><td>${pct(a.ihf*a.rat,0)}</td><td>${nf(a.afa,2)}</td><td>${nf(a.rbw,2)}</td><td>${nf(a.fix,2)}</td><td>${nf(a.umw,1)}</td></tr>`).join('');
   const per=`<tr><th>Personal</th><th>Anfang</th><th>Fluk.</th><th>Einst.</th><th>Entl.</th><th>Ende</th><th>Kosten</th></tr>`+['Einkauf','Verwaltung','Fertigung','F&E','Vertrieb'].map((l,j)=>{const p=r.P[j];return `<tr><td>${l}</td><td>${nf(p.anf)}</td><td>${nf(p.fl)}</td><td>${nf(p.einst)}</td><td>${nf(p.entl)}</td><td>${nf(p.end)}</td><td>${nf(p.sum,2)}</td></tr>`;}).join('');
-  return `<div class="two"><div><h3>Kostenarten (MEUR)</h3><table>${kost}</table></div><div><h3>GuV (MEUR)</h3><table>${guv}</table><h3 style="margin-top:14px">Liquidität (MEUR)</h3><table>${liq}</table></div>
-    <div><h3>Planbilanz (MEUR)</h3><table>${bil}</table><p class="note">Bilanzdifferenz ${r.bi_diff.toExponential(1)}</p></div><div><h3>Anlagen</h3><div class="scroll"><table>${anl}</table></div><h3 style="margin-top:14px">Personal</h3><div class="scroll"><table>${per}</table></div></div></div>`;
+  return `<h3>Anlagen</h3><div class="scroll"><table>${anl}</table></div><h3 style="margin-top:14px">Personal</h3><div class="scroll"><table>${per}</table></div><p class="note">Bilanzdifferenz der Planrechnung: ${r.bi_diff.toExponential(1)} (muss ≈ 0 sein).</p>`;
 }
 
 function ausblickHtml(){

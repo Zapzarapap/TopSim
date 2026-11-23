@@ -290,6 +290,18 @@ export function modell(B, F, A, Q) {
   r.vv_genutzt = Math.min(vv, Math.max(0, r.egt)); r.vv_neu = vv - r.vv_genutzt + Math.max(0, -r.egt);
   r.steuern = Math.max(0, r.egt - vv) * t; r.pue = r.egt - r.steuern;
   r.kasse = c1 + r.ueberz - r.steuern - r.zins_ue;
+  // Liquiditätsrechnung in TNB12-Gliederung und Cashflow in TNB14-Gliederung
+  r.ez_akt = r.umsatz_m1 * R.zahl_sofort + r.umsatz_ga + r.umsatz_aus; r.ez_vp = b('t15_ford'); r.ez_wp = b('t15_wp');
+  r.ez_kredit = n(F.kurz) + n(F.lang); r.ez_sum = r.ez + r.ueberz;
+  r.az_mat = r.es_zug_val + r.nachl_val + r.bs; r.az_pers = r.g_pers - r.k_pens; r.az_sonst = r.g_sonst;
+  r.az_tilg = b('t15_kurz') + b('t15_ueberz'); r.az_inv = r.inv_anl; r.az_wp = n(F.wp); r.az_umw = n(F.umwelt);
+  r.az_sum = r.az + r.steuern + r.zins_ue;
+  r.cf_trad = r.pue + r.g_afa + r.k_pens;
+  r.cf_mat = b('t15_mat') - r.es_end_val; r.cf_fe = b('t15_fe') - r.fe_end_val; r.cf_ford = b('t15_ford') - r.bi_ford;
+  r.icf = -(r.inv_anl + n(F.umwelt)) + r.resterloes;
+  r.cf_div = -r.div; r.cf_wp = b('t15_wp') - n(F.wp);
+  r.cf_bank = n(F.kurz) + n(F.lang) + r.ueberz - b('t15_kurz') - b('t15_ueberz');
+  r.fcfin = r.cf_div + r.cf_wp + r.cf_bank;
   r.kreditbedarf = r.ueberz > 0 ? (km - c0) / (1 - r.r_kurz * (1 - (r.egt_vor - vv > 0 ? t : 0))) : 0;
   // Bilanz und Kennzahlen
   r.bi_grund = b('t15_grund') - r.afa_geb;
@@ -304,6 +316,9 @@ export function modell(B, F, A, Q) {
   r.ekr = b('t15_ek') === 0 ? 0 : r.pue / b('t15_ek');
   r.ocf = r.pue + r.g_afa + r.k_pens + (b('t15_mat') - r.es_end_val) + (b('t15_fe') - r.fe_end_val) + (b('t15_ford') - r.bi_ford);
   r.ekq = r.bi_akt === 0 ? 0 : r.bi_ek / r.bi_akt; r.ausl_pers = r.pers_kap === 0 ? 0 : r.fm_plan / r.pers_kap;
+  r.fcf = r.ocf + r.icf; r.d_kasse = r.kasse - r.l_anf;
+  r.fk = r.bi_pens + r.bi_lang + n(F.kurz) + r.ueberz; r.fkq = r.bi_akt === 0 ? 0 : r.fk / r.bi_akt;
+  r.ur = r.umsatz === 0 ? 0 : r.pue / r.umsatz; r.ebit = r.be; r.ebitda = r.be + r.g_afa;
   r.ek_vp = b('t15_ek'); r.pue_vp = b('t11_pue'); r.vortrag_vp = b('t11_vortrag');
   return r;
 }

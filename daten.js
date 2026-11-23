@@ -112,7 +112,16 @@ export function backtest(P, i, absatzIst = true) {
     ['Maschinen', 'MEUR', r.bi_masch, g(B, 't15_masch'), 2],
     ['Eigenkapital', 'MEUR', r.bi_ek, g(B, 't15_ek'), 2],
     ['Bilanzsumme', 'MEUR', r.bi_akt, g(B, 't15_bsa'), 2],
+    ['Einzahlungen aus Umsatz akt. Periode', 'MEUR', r.ez_akt, g(B, 't12_ez_akt'), 2],
+    ['Einzahlungen gesamt', 'MEUR', r.ez_sum, g(B, 't12_ez_sum'), 2],
+    ['Auszahlungen Material', 'MEUR', r.az_mat, g(B, 't12_az_mat'), 2],
+    ['Auszahlungen Personal', 'MEUR', r.az_pers, g(B, 't12_az_pers'), 2],
+    ['Auszahlungen gesamt', 'MEUR', r.az_sum, g(B, 't12_az_sum'), 2],
+    ['Traditioneller Cashflow', 'MEUR', r.cf_trad, g(B, 't14_tcf'), 2],
     ['Operativer Cashflow', 'MEUR', r.ocf, g(B, 't14_ocf'), 2],
+    ['Free Cashflow', 'MEUR', r.fcf, g(B, 't14_fcf'), 2],
+    ['DB I', 'MEUR', r.db1, g(B, 't10_umsatz') - g(B, 't10_vmat') - g(B, 't10_vfert') - g(B, 't10_transp'), 2],
+    ['Herstellkosten des Umsatzes', 'MEUR', r.hkdu, g(B, 't11u_hkdu'), 2],
     ['EK-Rendite', '%', r.ekr * 100, g(B, 't01_ekr'), 2],
   ];
   return { r, zeilen, inSample: i === 0 };
