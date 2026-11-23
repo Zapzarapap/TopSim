@@ -162,9 +162,10 @@ const WIRK = {
 
 let PER, D, S;       // alle Perioden, aktuelle Datenbasis, Zustand
 const KEY = 'topsim-spielwiese-v2';
-// Ungerundete Anzeige: volle Genauigkeit (bis 8 Nachkommastellen, Rechenrauschen < 1e-9 entfernt)
-const EPS=1e-9;
-const nf=(x,d=0)=>{ if(x==null||isNaN(x)||!isFinite(x)) return '–'; const y=Math.abs(x)<EPS?0:+x.toPrecision(12); return y.toLocaleString('de-DE',{minimumFractionDigits:0,maximumFractionDigits:8}); };
+// Anzeige: immer 2 Nachkommastellen; ganze Stückzahlen ohne Nachkommastellen
+const EPS=0.005;
+const nf=(x,d=0)=>{ if(x==null||isNaN(x)||!isFinite(x)) return '–'; const y=Math.round(x*100)/100; const ganz=d===0&&Math.abs(y-Math.round(y))<1e-9;
+  return (Math.abs(y)<1e-9?0:y).toLocaleString('de-DE',{minimumFractionDigits:ganz?0:2,maximumFractionDigits:ganz?0:2}); };
 const sg=(x,d=0)=>(x>0?'+':x<0?'−':'±')+nf(Math.abs(x),d);
 const pct=(x,d=1)=>nf(x*100,d)+' %';
 const $=id=>document.getElementById(id);
@@ -270,7 +271,7 @@ const PB=[
 const pv=(r,a)=>typeof a==='function'?a(r):r[a];
 const fmtU=(v,u,d)=>u==='%'?pct(v,d):nf(v,d)+(u==='MEUR'?' MEUR':'');
 const dU=(v,u,d)=>u==='%'?sg(v*100,d)+' %-P.':sg(v,d);
-const tolU=()=>EPS;
+const tolU=u=>u==='%'?0.00005:EPS;
 const clsG=(v,gd)=>!gd?'':(v*gd>0?'pos':'neg');
 function diffs(rA,rB){ return PB.map(([t,rows])=>[t,rows.map(([l,a,u,d,gd])=>{const v=pv(rB,a)-pv(rA,a);return Math.abs(v)>tolU(u,d)?[l,v,u,d,gd]:null;}).filter(Boolean)]).filter(x=>x[1].length); }
 let cur, base, sc, tabSel='pb';
