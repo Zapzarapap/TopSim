@@ -84,9 +84,7 @@ tr.chg td{background:var(--tealbg)}
   <div><h1>TOPSIM Spielwiese</h1><div class="sub" id="sub">Unternehmen 1 · Copy Classic · Markt 1</div></div>
   <div class="bar">
     <button id="undo" type="button">Rückgängig</button>
-    <button id="setbase" type="button">Als Basis merken</button>
-    <button id="reset" type="button">Auf Basis zurück</button>
-    <button id="defaults" type="button" title="Formular, Nachrichten und Annahmen auf die Werte aus den Berichten setzen">Neu laden aus Berichten</button>
+    <button id="reset" type="button" title="Formular, Nachrichten und Annahmen auf die hochgeladenen Daten zurücksetzen">Auf Basis zurück</button>
   </div>
 </header>
 <p class="msg" id="msg"></p>
@@ -171,12 +169,15 @@ const $=id=>document.getElementById(id);
 const grp=g=>g==='form'?S.F:g==='an'?S.A:S.Q;
 
 function defaults(){ const B=D.B; return {F:M.formAus(B),A:M.kalibriere(B),Q:{...(D.prognose||{})}}; }
-function fresh(){ const d=defaults(); return {per:D.periode,F:d.F,A:d.A,Q:d.Q,base:null,last:null,undo:[]}; }
-function save(){ try{ localStorage.setItem(KEY,JSON.stringify({per:S.per,F:S.F,A:S.A,Q:S.Q,base:S.base})); }catch(e){} }
-function load(){ try{ const j=JSON.parse(localStorage.getItem(KEY)); if(!j||j.per!==D.periode) return null; const d=defaults();
-  return {per:j.per,F:{...d.F,...j.F},A:{...d.A,...j.A},Q:{...d.Q,...j.Q},base:j.base,last:null,undo:[]}; }catch(e){ return null; } }
+// Datenstand: ändert sich bei neuer Periode oder korrigierten Daten → Eingaben starten neu von der Basis
+const stand=()=>D.periode+'|'+JSON.stringify(D.prognose||{})+'|'+JSON.stringify(D.berichte||{}).length;
+function fresh(){ const d=defaults(); return {per:stand(),F:d.F,A:d.A,Q:d.Q,last:null,undo:[]}; }
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify({per:S.per,F:S.F,A:S.A,Q:S.Q})); }catch(e){} }
+function load(){ try{ const j=JSON.parse(localStorage.getItem(KEY)); if(!j||j.per!==stand()) return null; const d=defaults();
+  return {per:j.per,F:{...d.F,...j.F},A:{...d.A,...j.A},Q:{...d.Q,...j.Q},last:null,undo:[]}; }catch(e){ return null; } }
 const calc=(F=S.F,A=S.A,Q=S.Q)=>M.modell(D.B,F,A,Q);
-const baseOf=()=>S.base||defaults();
+// Basis = immer die hochgeladenen Daten der aktuellen Periode (Entscheidungen TNB19, Prognose, kalibrierte Annahmen)
+let BASE=null; const baseOf=()=>BASE;
 
 function inp(g,key,step,val){ if(step===null){ const opts=['Ja','Nein']; return `<select id="${g}-${key}" data-g="${g}" data-k="${key}">${opts.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select>`; }
   return `<input id="${g}-${key}" data-g="${g}" data-k="${key}" type="number" inputmode="decimal" step="${step}" value="${val==null?'':val}">`; }
@@ -306,7 +307,7 @@ function render(){
 // ---------- Reiter ----------
 function renderTab(){
   const el=$('tab');
-  if(tabSel==='pb') el.innerHTML=`<p class="note">Alle Berichte der Planperiode in TOPSIM-Gliederung. Basis = Vorbelegung aus den Berichten bzw. „Als Basis merken“. Geänderte Zeilen sind hinterlegt; grün = besser, rot = schlechter.</p>`+
+  if(tabSel==='pb') el.innerHTML=`<p class="note">Alle Berichte der Planperiode in TOPSIM-Gliederung. Basis = hochgeladene Daten der Periode (Entscheidungen aus TNB19, Wirtschaftsnachrichten, kalibrierte Annahmen). Geänderte Zeilen sind hinterlegt; grün = besser, rot = schlechter.</p>`+
     PB.map(([t,rows])=>`<h3 style="margin:16px 0 4px;font-size:15px">${t}</h3><div class="scroll"><table><tr><th>Position</th><th>Basis</th><th>Jetzt</th><th>Δ</th></tr>`+rows.map(([l,a,u,d,gd])=>{const b0=pv(base,a),c0=pv(cur,a),v=c0-b0,ch=Math.abs(v)>tolU(u,d);
       return `<tr class="${ch?'chg':''}"><td>${l}</td><td>${fmtU(b0,u,d)}</td><td><b>${fmtU(c0,u,d)}</b></td><td class="${ch?clsG(v,gd):'mute'}">${ch?dU(v,u,d):'–'}</td></tr>`;}).join('')+'</table></div>').join('');
   if(tabSel==='wirk') el.innerHTML=wirkung();
@@ -383,9 +384,7 @@ form.addEventListener('input',e=>{const el=e.target; if(!el.dataset.k) return; c
   markChanged(); render();});
 form.addEventListener('change',e=>{ if(S.last&&focusSnap&&focusSnap.el===e.target){ S.undo.push({g:S.last.g,k:S.last.k,v:S.last.old}); focusSnap={el:e.target,val:grp(S.last.g)[S.last.k],res:calc()}; }});
 $('undo').onclick=()=>{const u=S.undo.pop(); if(!u) return; const before=calc(); const now=grp(u.g)[u.k]; grp(u.g)[u.k]=u.v; const el=$(u.g+'-'+u.k); if(el) el.value=u.v??''; S.last={label:'Rückgängig '+(el?label(el):u.k),from:fmtV(now),to:fmtV(u.v),res:before,k:u.k}; markChanged(); render();};
-$('setbase').onclick=()=>{S.base={F:{...S.F},A:{...S.A},Q:{...S.Q}}; markChanged(); render(); flash('Aktuelle Eingaben sind jetzt die Basis für den Vergleich.');};
-$('reset').onclick=()=>{const B=baseOf(); S.F={...B.F};S.A={...B.A};S.Q={...B.Q};S.last=null;S.undo=[]; renderForm(); clearLast(); render();};
-$('defaults').onclick=()=>{ if(!confirm('Alle Eingaben auf die Werte aus den Berichten zurücksetzen? Die gemerkte Basis wird gelöscht.')) return; S=fresh(); renderForm(); clearLast(); render(); flash('Formular, Nachrichten und Annahmen neu aus den Berichten geladen.');};
+$('reset').onclick=()=>{const B=baseOf(); S.F={...B.F};S.A={...B.A};S.Q={...B.Q};S.last=null;S.undo=[]; renderForm(); clearLast(); render(); flash('Alle Eingaben auf die hochgeladenen Daten zurückgesetzt.');};
 function clearLast(){ $('last').innerHTML=''; $('lastN').textContent='Ändere ein Feld im Formular – hier erscheint, was es bewirkt (gegenüber dem Stand direkt davor).'; $('lastN').style.display=''; $('lastH').textContent='Was hat sich geändert?'; }
 $('copy').onclick=async()=>{const t=`Umsatz Markt 1: ${nf(cur.umsatz_m1,2)} MEUR\nEK-Rendite: ${nf(cur.ekr*100,2)} %\nOperativer Cashflow: ${nf(cur.ocf,2)} MEUR\nGeplanter Absatz: ${nf(cur.absatz)} Stück`;
   try{await navigator.clipboard.writeText(t); $('copied').textContent='kopiert';}catch(e){$('copied').textContent='Kopieren nicht erlaubt – bitte abschreiben';}};
@@ -398,6 +397,7 @@ async function start(){
     const files=await Promise.all(idx.perioden.map(async n=>(await fetch(`data/p${n}.json`,{cache:'no-store'})).json()));
     PER=DT.bereite(files); D=PER[PER.length-1];
   }catch(e){ flash('Daten konnten nicht geladen werden ('+e.message+'). Die Seite muss über GitHub Pages oder einen Webserver laufen, nicht als Datei.'); return; }
+  BASE=defaults(); Object.freeze(BASE.F); Object.freeze(BASE.A); Object.freeze(BASE.Q);
   const saved=load(); S=saved||fresh();
   if(!saved&&localStorage.getItem(KEY)) flash(`Neue Berichte für Periode ${D.periode} geladen – Formular ist mit den Entscheidungen aus TNB19 vorbelegt.`);
   renderForm(); render();
