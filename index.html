@@ -275,6 +275,7 @@ const tolU=u=>u==='%'?0.00005:EPS;
 const clsG=(v,gd)=>!gd?'':(v*gd>0?'pos':'neg');
 function diffs(rA,rB){ return PB.map(([t,rows])=>[t,rows.map(([l,a,u,d,gd])=>{const v=pv(rB,a)-pv(rA,a);return Math.abs(v)>tolU(u,d)?[l,v,u,d,gd]:null;}).filter(Boolean)]).filter(x=>x[1].length); }
 let cur, base, sc, tabSel='pb';
+let VP=null; // Vorperiode: Ist-Entscheidungen und Ist-Absatz nachgerechnet (entspricht dem Sammelbericht)
 
 function render(){
   sc=M.szenarien(D.B,S.F,S.A,S.Q); cur=sc.basis; const B0=baseOf(); base=M.modell(D.B,B0.F,B0.A,B0.Q);
@@ -286,7 +287,7 @@ function render(){
   $('kasse').innerHTML=nf(cur.kasse,2)+'<small> MEUR</small>'; $('ekr').textContent=pct(cur.ekr,2); $('abs').textContent=nf(cur.absatz);
   const R=M.R, mx=1.25;
   const meter=(lab,x,sub)=>`<div class="meter"><div class="lab"><span>${lab}</span><b>${pct(x)}</b></div><div class="track"><div class="fill" style="width:${Math.min(100,x/mx*100)}%;background:${x>1+R.ues_anl?'var(--r)':x>1?'var(--y)':'var(--teal)'}"></div><div class="mk" style="left:${100/mx}%"></div><div class="mk r" style="left:${(1+R.ues_anl)/mx*100}%"></div></div><div class="note">${sub}</div></div>`;
-  $('meters').innerHTML=meter('Anlagen',cur.ausl_anl,`Kapazität ${nf(cur.kap)} Stück`)+meter('Personal',cur.ausl_pers,`${nf(cur.einsetzbar)} einsetzbare MA × ${nf(cur.prod,2)}`)+`<div class="note">Strich = 100 %, rot = 110 % (Grenze mit Überstunden)</div>`;
+  $('meters').innerHTML=meter('Anlagen',cur.ausl_anl,`Kapazität ${nf(cur.kap)} Stück`)+meter('Personal',cur.ausl_pers,`Plan P${D.periode+1}: ${nf(cur.einsetzbar)} einsetzbare MA × ${nf(cur.prod,2)}`)+`<div class="note">Strich = 100 %, rot = 110 % (Grenze mit Überstunden)</div>`;
   // Szenarien
   const pl={absatz:cur.absatz,ekr:cur.ekr,ocf:cur.ocf};
   const S3=[sc.pess,sc.basis,sc.opt];
@@ -310,9 +311,10 @@ function render(){
 // ---------- Reiter ----------
 function renderTab(){
   const el=$('tab');
-  if(tabSel==='pb') el.innerHTML=`<p class="note">Alle Berichte der Planperiode in TOPSIM-Gliederung. Basis = hochgeladene Daten der Periode (Entscheidungen aus TNB19, Wirtschaftsnachrichten, kalibrierte Annahmen). Geänderte Zeilen sind hinterlegt; grün = besser, rot = schlechter.</p>`+
-    PB.map(([t,rows])=>`<h3 style="margin:16px 0 4px;font-size:15px">${t}</h3><div class="scroll"><table><tr><th>Position</th><th>Basis</th><th>Jetzt</th><th>Δ</th></tr>`+rows.map(([l,a,u,d,gd])=>{const b0=pv(base,a),c0=pv(cur,a),v=c0-b0,ch=Math.abs(v)>tolU(u,d);
-      return `<tr class="${ch?'chg':''}"><td>${l}</td><td>${fmtU(b0,u,d)}</td><td><b>${fmtU(c0,u,d)}</b></td><td class="${ch?clsG(v,gd):'mute'}">${ch?dU(v,u,d):'–'}</td></tr>`;}).join('')+'</table></div>').join('');
+  if(!VP) VP=DT.backtest(PER,PER.indexOf(D),true).r;
+  if(tabSel==='pb') el.innerHTML=`<p class="note">Alle Berichte der Planperiode P${D.periode+1} in TOPSIM-Gliederung; links zum Vergleich die abgeschlossene Periode P${D.periode} (Ist). Basis = hochgeladene Daten der Periode (Entscheidungen aus TNB19, Wirtschaftsnachrichten, kalibrierte Annahmen). Geänderte Zeilen sind hinterlegt; grün = besser, rot = schlechter.</p>`+
+    PB.map(([t,rows])=>`<h3 style="margin:16px 0 4px;font-size:15px">${t}</h3><div class="scroll"><table><tr><th>Position</th><th>Vorperiode P${D.periode} (Ist)</th><th>Basis P${D.periode+1}</th><th>Jetzt P${D.periode+1}</th><th>Δ</th></tr>`+rows.map(([l,a,u,d,gd])=>{const b0=pv(base,a),c0=pv(cur,a),v=c0-b0,ch=Math.abs(v)>tolU(u,d);
+      return `<tr class="${ch?'chg':''}"><td>${l}</td><td class="mute">${fmtU(pv(VP,a),u,d)}</td><td>${fmtU(b0,u,d)}</td><td><b>${fmtU(c0,u,d)}</b></td><td class="${ch?clsG(v,gd):'mute'}">${ch?dU(v,u,d):'–'}</td></tr>`;}).join('')+'</table></div>').join('');
   if(tabSel==='wirk') el.innerHTML=wirkung();
   if(tabSel==='rech') el.innerHTML=rechnung(cur);
   if(tabSel==='aus') el.innerHTML=ausblickHtml();
