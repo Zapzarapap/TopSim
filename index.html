@@ -219,6 +219,17 @@ function status(r,sc){
   if(o.ngn>0&&r.ngn===0) rp.push(`optimistisch Fehlmenge ${nf(o.ngn)} Stück`);
   if(p.pue<0&&r.pue>=0) rp.push('pessimistisch Verlust');
   a.rob=[rp.length?'Y':'G','Robustheit',rp.length?rp.join(' · '):`hält bei Nachfrage ±${pct(+S.A.unsicherheit||0,0)}`];
+  { const B0=baseOf().F, d=k=>(+F[k]||0)-(+B0[k]||0), w=[];
+    const neuQ=r.neu_quote, neuB=base.neu_quote;
+    if(Math.abs(neuQ-neuB)>0.005||neuQ>0.1) w.push(`Einstellungen ${pct(neuQ,1)} des Bestands (P0: ${pct(neuB,1)}): Einarbeitung kann die Produktivität senken, im Modell konstant`);
+    if(F.pers<0&&-F.pers>0) w.push('Entlassungen senken die Motivation (zeitverzögert), im Modell nicht berücksichtigt');
+    if(d('training')) w.push(`Training ${d('training')>0?'↑':'↓'}: Qualifikation und Fehlzeiten ändern sich, im Modell nicht berücksichtigt`);
+    if(d('pnk')) w.push(`Personalnebenkosten ${d('pnk')>0?'↑':'↓'}: Fluktuation und Fehlzeiten ändern sich, im Modell nicht berücksichtigt`);
+    if(d('po')) w.push('Prozessoptimierung: Produktivität +4 % je 2,5 MEUR ist modelliert, höhere Fehlzeiten nicht');
+    if(['A','B','C'].some(t=>d('rat_'+t))||['A','B','C'].some(t=>+F['rat_'+t]>0)) w.push('Rationalisierung: Kosten sind enthalten, der Kapazitätszuwachs nicht (Faktor bleibt 1,00)');
+    if(r.ausl_pers>0.98&&r.ausl_pers<=1) {} 
+    if(w.length) a.unsicher=['Y','Nicht im Modell',w.join(' · ')+'. Die Personalauslastung kann deshalb abweichen.'];
+  }
   return a;
 }
 
