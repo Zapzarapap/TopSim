@@ -26,14 +26,13 @@
   "aus_preis": 0
  },
  "prognose": {
-  "wachstum": 0.02,
+  "wachstum": 0,
   "bpreis": 3000,
   "ep1": 650,
   "ep2": 550,
   "ep3": 450,
   "ep4": 400,
   "nachl": 780,
-  "lohn": 0.03,
   "geh_ek": 31000,
   "geh_vw": 29000,
   "geh_fe": 31000,
