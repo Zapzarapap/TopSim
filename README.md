@@ -1,32 +1,30 @@
 # TOPSIM Spielwiese
 
-Planungstool für TOPSIM „Mastering Business Operations“ (Unternehmen 1, Copy Classic, Markt 1). Jede Eingabe im Entscheidungsformular zeigt sofort ihre Wirkung auf Ergebnis, Kasse, Kapazität und Bilanz, dazu drei Nachfrage-Szenarien, die Wirkung jeder einzelnen Entscheidung und einen Ausblick auf die Periode danach.
+Planungstool für TOPSIM „Mastering Business Operations“ (Unternehmen 1, Copy Classic, Markt 1). Aktuell: **Planung Periode 2** auf Basis des Sammelberichts Periode 1.
 
-Läuft über GitHub Pages, ohne Build-Schritt. Lokal geht es nur über einen Webserver (z. B. `python3 -m http.server`), nicht per Doppelklick auf die Datei.
+Läuft über GitHub Pages ohne Build-Schritt. Lokal nur über einen Webserver (`python3 -m http.server`), nicht per Doppelklick.
 
 ## Aufbau
 
 | Datei | Inhalt |
 |---|---|
-| `index.html` | Oberfläche |
-| `model.js` | Planungsrechnung: Spielregeln (mit Handbuchseite), Kalibrierung, Szenarien, Ausblick |
-| `daten.js` | Laden der Perioden, Rechenprüfungen der Berichte, Backtest |
-| `data/p{n}.json` | Sammelbericht Periode n als Zahlen, gültige Wirtschaftsnachrichten, Prognose für n+1 |
-| `tools/parse_sammelbericht.py` | liest einen Sammelbericht (PDF) aus |
-| `tools/neue_periode.py` | legt `data/p{n}.json` an |
-| `tools/check.mjs` | prüft alle Perioden und rechnet den Backtest |
+| `index.html`, `app.js` | Oberfläche: Formular wie in TOPSIM, Kennzahlen, Hinweise, Reiter, Rechenweg-Panel |
+| `modell.js` | Rechenmodell. Jede Größe wird mit Rechenweg, Quelle und Verlässlichkeit abgelegt |
+| `daten/stand_p1.json` | Stand Ende P1 (Ausgangslage P2), jeder Wert mit Fundstelle im Bericht |
+| `daten/stand_p0.json` | Stand Ende P0 (nur für den Backtest) |
+| `daten/perioden.json` | je Periode: Wirtschaftsnachrichten, Entscheidungen, Ist-Werte |
+| `tools/pruefen.mjs` | Backtest P1 und Plan P2 auf der Konsole |
 
-## Neue Periode einpflegen
+## Verlässlichkeit
 
-1. `python3 tools/neue_periode.py <n> Sammelbericht_Periode_n.pdf prognose.json`
-   (`prognose.json` = Wirtschaftsnachrichten für n+1, Schlüssel wie `prognose` in `data/p0.json`)
-2. `node tools/check.mjs` – alle Rechenprüfungen müssen bestehen. Der Backtest zeigt, wie genau das Modell Periode n getroffen hat.
-3. Größere Abweichungen im Backtest klären (Modell oder Annahme anpassen), dann committen und pushen.
+- grün: Spielregel aus dem Handbuch, Wirtschaftsnachricht oder Ist-Wert
+- gelb: aus den Berichten abgeleitet (Fluktuation, Fehlzeiten, Produktivität, Nacharbeit, Wertanalyse, Umweltpunkte)
+- rot: Schätzung, vor allem Nachfrage und Verhalten der Konkurrenz
+- Eine Größe ist so unsicher wie ihre unsicherste Zutat.
 
-Neue Entscheidungsbereiche (z. B. Markt 2, neues Produkt) brauchen eine Erweiterung von `model.js` und `index.html`.
+## Neue Periode einpflegen (n = Periode des neuen Sammelberichts)
 
-## Was das Modell kann und was nicht
-
-- **Exakt nach Spielregeln:** Kosten, Personal, Anlagen, Lager, GuV, Liquidität mit Überziehungskredit, Steuern, Bilanz. Der Backtest P0 trifft alle Positionen auf 0,01 MEUR.
-- **Aus den Berichten kalibriert:** Fluktuation, Fehlzeiten, Produktivität, Nacharbeit, Rationalisierungs- und Wertanalyseindex.
-- **Geschätzt:** die Nachfrage (Handbuchanker für Werbung und Vertrieb, Preiselastizität geschätzt) und die Wirkung von Training, Rationalisierungsbudget, Technologie, Ökologie und CI. Deshalb gibt es die Szenarien ±Unsicherheit und den Reiter „Wirkung je Entscheidung“, der für jedes Feld sagt, was gerechnet wird und was nicht.
+1. `daten/stand_p{n}.json` aus dem Sammelbericht anlegen (Aufbau wie `stand_p1.json`).
+2. In `daten/perioden.json` bei Periode n die Ist-Werte und bei n+1 Wirtschaftsnachrichten und die Vorbelegung des Formulars ergänzen.
+3. In `app.js` `PLAN` hochzählen und die Ladepfade anpassen, Backtest auf Periode n umstellen.
+4. `node tools/pruefen.mjs`: Bilanzprobe muss 0 sein, Backtest-Abweichungen klären.

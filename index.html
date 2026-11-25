@@ -3,426 +3,120 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TOPSIM Spielwiese</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>TOPSIM Spielwiese – Planung Periode 2</title>
 <style>
-:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0d1416);--ink:light-dark(#14161a,#e7eceb);--mute:light-dark(#5d6670,#9aa7a8);--line:light-dark(#d9dee2,#26343a);--panel:light-dark(#f4f7f7,#13201f);--teal:light-dark(#0b5d63,#5fc3c9);--tealbg:light-dark(#e3f0f0,#12302f);--in:light-dark(#fffbe0,#2a2a14);
---g:light-dark(#2e7d32,#7ccf80);--gbg:light-dark(#e4f2e4,#13301a);--y:light-dark(#8a6100,#f0c95a);--ybg:light-dark(#fff3cd,#3a3010);--r:light-dark(#b3261e,#ff8a80);--rbg:light-dark(#fbe2df,#3d1715)}
-*{box-sizing:border-box;min-width:0}
-html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif;overflow-x:clip}
-header{background:var(--teal);color:#fff;padding:18px max(3vw,16px) 16px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between}
-@media(prefers-color-scheme:dark){header{color:#0d1416}}
-h1{font:700 clamp(28px,3.4vw,40px)/1.05 "Libre Caslon Text",Georgia,serif;margin:0;letter-spacing:-.02em}
-.sub{font-size:14px;opacity:.9;margin-top:4px}
-.bar{display:flex;flex-wrap:wrap;gap:8px}
-button{font:600 14px Inter,sans-serif;min-height:40px;padding:8px 14px;border-radius:8px;border:1px solid currentColor;background:transparent;color:inherit;cursor:pointer}
-button:hover{background:color-mix(in srgb,currentColor 12%,transparent)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--y);outline-offset:2px}
-main{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:24px;padding:20px max(3vw,16px) 40px;max-width:1480px;margin:0 auto}
-.form section,.form details{border:1px solid var(--line);border-radius:10px;margin-bottom:12px;background:var(--bg)}
-.form h2{font:600 13px Inter,sans-serif;margin:0;padding:8px 12px;background:var(--tealbg);color:var(--teal);border-radius:10px 10px 0 0}
-.row{display:grid;grid-template-columns:minmax(0,1fr) 120px 52px;gap:8px;align-items:center;padding:5px 12px;border-top:1px solid var(--line)}
-.row.t{grid-template-columns:minmax(0,1fr) repeat(3,64px)}
-.row label{font-size:14px}
-.row .u{font-size:13px;color:var(--mute)}
-.row.head{font-size:13px;color:var(--mute);font-weight:600}
-.src{display:block;font-size:12px;color:var(--mute)}
-.src.est{color:var(--y)}
-input,select{font:16px Inter,sans-serif;width:100%;min-height:36px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--in);color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
-select{text-align:left}
-input.chg,select.chg{border-color:var(--teal);box-shadow:inset 3px 0 0 var(--teal)}
-details summary{cursor:pointer;padding:10px 12px;font-weight:600;font-size:14px}
-.res{display:grid;gap:14px;align-content:start}
-.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;padding:18px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
-.big .k{font-size:13px;color:var(--mute)}
-.big .v{font:700 clamp(28px,3.4vw,44px)/1 "Libre Caslon Text",Georgia,serif;letter-spacing:-.02em;overflow-wrap:anywhere}
-.big .d{font-weight:600;margin-top:6px;white-space:nowrap}
-.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
-.trio div{font-size:13px;color:var(--mute)}.trio b{display:block;font-size:16px;color:var(--ink);overflow-wrap:anywhere}.trio small{font-size:13px;font-weight:500}
-.meter{margin-bottom:12px}.meter .lab{display:flex;justify-content:space-between;font-size:13px}
-.track{position:relative;height:18px;border-radius:4px;background:var(--bg);border:1px solid var(--line);margin-top:4px;overflow:hidden}
-.fill{position:absolute;inset:0 auto 0 0;background:var(--teal);transition:width .25s}
-.mk{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink)}.mk.r{background:var(--r)}
-.amps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.amp{border-radius:8px;padding:8px 10px;font-size:13px;border:1px solid var(--line)}
-.amp b{display:block;font-size:13px}
-.amp.G{background:var(--gbg)}.amp.G b{color:var(--g)}.amp.Y{background:var(--ybg)}.amp.Y b{color:var(--y)}.amp.R{background:var(--rbg)}.amp.R b{color:var(--r)}
-.card{border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.card h3{font:600 15px Inter,sans-serif;margin:0 0 8px}
-.chg-list{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(13em,1fr));gap:4px 16px}
-.chg-list li{display:flex;justify-content:space-between;gap:8px;font-size:14px;border-bottom:1px dotted var(--line);padding:3px 0}
-.pos{color:var(--g)}.neg{color:var(--r)}.mute{color:var(--mute)}
-.scroll{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-size:14px}
-th,td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-th:first-child,td:first-child{text-align:left;white-space:normal}
-#tab td:first-child{min-width:16em;max-width:30em}
-th{font-size:13px;color:var(--mute);font-weight:600;vertical-align:bottom}
-td.note,th.note{text-align:left;white-space:normal;font-size:13px;color:var(--mute);min-width:16em}
-tr.sum td{font-weight:600}
-tr.bad td{background:var(--ybg)}
-tr.chg td{background:var(--tealbg)}
-.pw{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
-.pw div{font-size:13px;color:var(--mute)}.pw b{display:block;font-size:18px;color:var(--ink);white-space:nowrap}
-.note{font-size:13px;color:var(--mute)}
-.msg{font-size:14px;padding:8px 12px;border-radius:8px;background:var(--tealbg);margin:12px max(3vw,16px) 0;display:none}
-.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.tabs button{min-height:36px;padding:6px 12px;border-color:var(--line);color:var(--ink)}
-.tabs button[aria-selected=true]{background:var(--teal);border-color:var(--teal);color:#fff}
-.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-.sc th:nth-child(3),.sc td:nth-child(3){background:var(--panel)}
-@media(max-width:1100px){.amps{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:900px){main{grid-template-columns:minmax(0,1fr)}.res{order:-1}}
-@media(max-width:600px){.hero{grid-template-columns:minmax(0,1fr)}.pw{grid-template-columns:repeat(2,minmax(0,1fr))}.amps{grid-template-columns:minmax(0,1fr)}.row{grid-template-columns:minmax(0,1fr) 110px 44px}.row.t{grid-template-columns:minmax(0,1fr) repeat(3,58px)}}
-@media(prefers-reduced-motion:reduce){.fill{transition:none}}
+  :root {
+    --blau: #0b5fa5; --blau-hell: #e8f1fa; --text: #1d2733; --grau: #6b7684; --linie: #dde3ea; --bg: #f5f7fa; --weiss: #fff;
+    --gruen: #2e8b57; --gelb: #d49a00; --rot: #c8382e; --ein: #0b5fa5;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--text); background: var(--bg); }
+  header { background: var(--blau); color: #fff; padding: 10px 18px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  header .sub { opacity: .85; font-size: 13px; }
+  header .legende { margin-left: auto; display: flex; gap: 12px; font-size: 12px; flex-wrap: wrap; }
+  header .legende span { display: inline-flex; align-items: center; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+  .d0 { background: var(--gruen); } .d1 { background: var(--gelb); } .d2 { background: var(--rot); } .dein { background: var(--ein); }
+  header .dot { border: 1.5px solid #fff; }
+  .layout { display: grid; grid-template-columns: 390px 1fr; gap: 16px; padding: 16px; align-items: start; }
+  @media (max-width: 1000px) { .layout { grid-template-columns: 1fr; } }
+  .panel { background: var(--weiss); border: 1px solid var(--linie); border-radius: 8px; }
+  .formular { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+  .ftabs { display: flex; border-bottom: 1px solid var(--linie); position: sticky; top: 0; background: #fff; z-index: 2; }
+  .ftabs button { flex: 1; border: 0; background: none; padding: 9px 4px; font: inherit; font-size: 12.5px; cursor: pointer; color: var(--grau); border-bottom: 3px solid transparent; }
+  .ftabs button.akt { color: var(--blau); border-bottom-color: #e08a00; font-weight: 600; }
+  .fbody { padding: 6px 14px 14px; }
+  .fgruppe { margin-top: 12px; }
+  .fgruppe h3 { font-size: 12px; letter-spacing: .04em; color: var(--blau); margin: 0 0 4px; border-bottom: 1px solid var(--blau); padding-bottom: 3px; text-transform: uppercase; }
+  .feld { display: grid; grid-template-columns: 1fr 120px; gap: 8px; align-items: center; padding: 3px 0; }
+  .feld label { font-size: 13px; }
+  .feld .einh { color: var(--grau); font-size: 11.5px; }
+  .feld input[type=number] { width: 100%; padding: 4px 6px; border: 1px solid #c7d0da; border-radius: 4px; font: inherit; text-align: right; }
+  .feld input.geaendert { background: #fff6e0; border-color: #e0b04a; }
+  .feld .vp { grid-column: 1 / -1; font-size: 11px; color: var(--grau); margin-top: -3px; }
+  .typen { display: grid; grid-template-columns: 1fr 70px 70px 70px; gap: 5px; align-items: center; font-size: 12.5px; }
+  .typen input { width: 100%; padding: 3px 4px; border: 1px solid #c7d0da; border-radius: 4px; text-align: right; font: inherit; }
+  .typen .kopf { font-weight: 600; text-align: center; font-size: 12px; }
+  .ann .feld { grid-template-columns: 14px 1fr 100px; }
+  .ann .hinw { grid-column: 2 / -1; font-size: 11px; color: var(--grau); margin-top: -3px; }
+  .knoepfe { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .knopf { border: 1px solid var(--blau); background: #fff; color: var(--blau); padding: 6px 10px; border-radius: 5px; cursor: pointer; font: inherit; font-size: 12.5px; }
+  .knopf.voll { background: var(--blau); color: #fff; }
+  .inhalt { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .kacheln { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: 10px; }
+  .kachel { background: #fff; border: 1px solid var(--linie); border-radius: 8px; padding: 9px 11px; cursor: pointer; position: relative; }
+  .kachel:hover { border-color: var(--blau); }
+  .kachel .l { font-size: 12px; color: var(--grau); display: flex; gap: 6px; align-items: center; }
+  .kachel .w { font-size: 21px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .kachel .s { font-size: 11.5px; color: var(--grau); }
+  .kachel.warn { border-left: 4px solid var(--rot); }
+  .kachel.ok { border-left: 4px solid var(--gruen); }
+  .kachel.mittel { border-left: 4px solid var(--gelb); }
+  .box { padding: 12px 14px; }
+  .box h2 { font-size: 15px; margin: 0 0 8px; }
+  .hinweise { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+  .hinweise li { padding: 6px 9px; border-radius: 5px; font-size: 13px; display: flex; gap: 8px; }
+  .hinweise li.rot { background: #fdecea; } .hinweise li.gelb { background: #fff6e0; } .hinweise li.gruen { background: #eaf6ef; } .hinweise li.info { background: var(--blau-hell); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 2px; border-bottom: 1px solid var(--linie); padding: 0 8px; }
+  .tabs button { border: 0; background: none; padding: 9px 10px; font: inherit; font-size: 13px; cursor: pointer; color: var(--grau); border-bottom: 3px solid transparent; }
+  .tabs button.akt { color: var(--blau); border-bottom-color: var(--blau); font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { padding: 4px 8px; border-bottom: 1px solid #edf0f3; text-align: right; font-size: 13px; }
+  th:first-child, td:first-child { text-align: left; }
+  th { font-weight: 600; color: var(--grau); font-size: 12px; background: #fafbfc; }
+  tr.klick { cursor: pointer; } tr.klick:hover td { background: var(--blau-hell); }
+  tr.summe td { font-weight: 600; border-top: 1px solid #c7d0da; }
+  tr.zwischen td { background: #fafbfc; font-weight: 600; }
+  td .dot { margin-right: 6px; vertical-align: middle; }
+  .pos { color: var(--gruen); } .neg { color: var(--rot); }
+  .klein { font-size: 12px; color: var(--grau); }
+  .zwei { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; } @media (max-width: 1300px) { .zwei { grid-template-columns: 1fr; } }
+  /* Rechenweg */
+  .rw-hg { position: fixed; inset: 0; background: rgba(20, 30, 45, .25); display: none; z-index: 20; }
+  .rw { position: fixed; top: 0; right: 0; bottom: 0; width: min(560px, 100%); background: #fff; z-index: 21; box-shadow: -4px 0 18px rgba(0,0,0,.15); display: none; flex-direction: column; }
+  .rw.offen, .rw-hg.offen { display: flex; }
+  .rw-kopf { padding: 12px 16px; border-bottom: 1px solid var(--linie); display: flex; gap: 10px; align-items: flex-start; }
+  .rw-kopf h2 { margin: 0; font-size: 16px; flex: 1; }
+  .rw-kopf button { border: 0; background: none; font-size: 22px; cursor: pointer; color: var(--grau); line-height: 1; }
+  .rw-body { padding: 14px 16px; overflow: auto; }
+  .rw-wert { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .rw-abschnitt { margin-top: 14px; }
+  .rw-abschnitt h4 { margin: 0 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--grau); }
+  .formel { background: #f3f6f9; border-radius: 5px; padding: 8px 10px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; white-space: pre-wrap; word-break: break-word; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #f0f3f6; margin-right: 6px; }
+  .pfad { font-size: 12px; color: var(--grau); margin-bottom: 8px; }
+  .pfad a { color: var(--blau); cursor: pointer; text-decoration: underline; }
+  .balken { margin-top: 6px; }
+  .balken .zeile { display: grid; grid-template-columns: 190px 1fr 80px; gap: 8px; align-items: center; margin: 5px 0; font-size: 12.5px; }
+  .balken .spur { position: relative; height: 16px; background: #f0f3f6; border-radius: 3px; }
+  .balken .b { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+  .balken .wert { text-align: right; font-variant-numeric: tabular-nums; }
+  .hinweisbox { background: var(--blau-hell); border-radius: 6px; padding: 8px 11px; font-size: 13px; margin: 8px 0; }
+  .warnbox { background: #fdecea; border-radius: 6px; padding: 8px 11px; font-size: 13px; margin: 8px 0; }
+  details summary { cursor: pointer; color: var(--blau); font-size: 13px; }
 </style>
 </head>
 <body>
 <header>
-  <div><h1>TOPSIM Spielwiese</h1><div class="sub" id="sub">Unternehmen 1 · Copy Classic · Markt 1</div></div>
-  <div class="bar">
-    <button id="undo" type="button">Rückgängig</button>
-    <button id="reset" type="button" title="Formular, Nachrichten und Annahmen auf die hochgeladenen Daten zurücksetzen">Auf Basis zurück</button>
+  <div><h1>TOPSIM Spielwiese · Planung Periode 2</h1><div class="sub">Unternehmen 1 · Copy Classic · Ausgangslage: Sammelbericht Periode 1</div></div>
+  <div class="legende">
+    <span><i class="dot d0"></i>Spielregel / Ist-Wert</span>
+    <span><i class="dot d1"></i>aus Berichten abgeleitet</span>
+    <span><i class="dot d2"></i>Schätzung (Nachfrage, Konkurrenz)</span>
+    <span><i class="dot dein"></i>eure Eingabe</span>
   </div>
 </header>
-<p class="msg" id="msg"></p>
-<main>
-  <div class="form" id="form"></div>
-  <div class="res">
-    <div class="hero">
-      <div class="big"><div class="k" id="pueK">Periodenüberschuss (Plan)</div><div class="v" id="pue"></div><div class="d" id="pueD"></div>
-        <div class="trio"><div>Kasse Ende<b id="kasse"></b></div><div>EK-Rendite<b id="ekr"></b></div><div>Absatz<b id="abs"></b></div></div></div>
-      <div id="meters"></div>
-    </div>
-    <div class="card" id="scenCard"><h3>Wenn die Nachfrage anders kommt</h3><div class="scroll"><table class="sc" id="scen"></table></div>
-      <p class="note" id="scenN"></p></div>
-    <div class="amps" id="amps"></div>
-    <div class="card"><h3 id="lastH">Was hat sich geändert?</h3><ul class="chg-list" id="last"></ul><p class="note" id="lastN">Ändere ein Feld im Formular – hier erscheint, was es bewirkt (gegenüber dem Stand direkt davor).</p></div>
-    <div class="card" id="pwCard"><h3>Planwerte für TOPSIM</h3><div class="pw" id="pw"></div><p class="note"><button id="copy" type="button" style="min-height:36px;margin-top:8px">Planwerte kopieren</button> <span id="copied"></span></p></div>
-    <div class="card">
-      <div class="tabs" role="tablist" id="tabs">
-        <button role="tab" data-t="pb" aria-selected="true">Planberichte</button>
-        <button role="tab" data-t="wirk">Wirkung je Entscheidung</button>
-        <button role="tab" data-t="rech">Anlagen und Personal</button>
-        <button role="tab" data-t="aus">Ausblick</button>
-        <button role="tab" data-t="bt">Backtest</button>
-      </div>
-      <div id="tab"></div>
-    </div>
-  </div>
-</main>
-<script type="module">
-import * as M from './model.js';
-import * as DT from './daten.js';
-
-const TY = M.TY;
-const FIELDS = [
- ['Vertrieb',[['preis','Preis (pro Stück)','EUR',10],['werbung','Werbung','MEUR',0.5],['vertrieb','Vertrieb (Anz. Pers.)','MA',5],['ci','Corporate Identity','MEUR',0.5],['mf','Marktforschungsbericht','',null]]],
- ['Produktentwicklung',[['tech','Technologie (Anz. Pers.)','MA',1],['oeko','Ökologie','MEUR',0.5],['wa','Wertanalyse','MEUR',0.5],['ga','Großabnehmer','Stück',500],['aus','Ausschreibung (Gebot)','EUR',10]]],
- ['Einkauf',[['einkauf','Einsatzstoffe/Teile','Einh.',1000]]],
- ['Fertigung',[['fm','Fertigungsmenge','Stück',500],'TYPED',['po','Prozessoptimierung','MEUR',0.5],['training','Training je Mitarbeiter','EUR',100],['umwelt','Investition Umweltanlagen','MEUR',0.5],['pnk','Personalnebenkosten','%',1],['pers','Fertigungspersonal Einst./Entl. (−)','MA',10]]],
- ['Finanzen',[['kurz','Kurzfristiger Kredit','MEUR',1],['lang','Langfristiger Kredit','MEUR',1],['wp','Kauf von Wertpapieren','MEUR',1],['div','Dividende','MEUR',0.5]]]];
-const TYPED = [['inv','Neue Anlagen (Anzahl)',1],['des1','Desinvestition Anl.-Nr.',1],['des2','Desinvestition Anl.-Nr.',1],['des3','Desinvestition Anl.-Nr.',1],['ih','Instandhaltung je Anlage (MEUR)',0.5],['rat','Rationalisierung je Typ (MEUR)',0.5]];
-const NEWS = [['wachstum','Marktwachstum','Anteil',0.01],['bpreis','Branchendurchschnittspreis','EUR',10],['ep1','Einkaufspreis < 30.000','EUR',10],['ep2','Einkaufspreis < 50.000','EUR',10],['ep3','Einkaufspreis < 70.000','EUR',10],['ep4','Einkaufspreis ab 70.000','EUR',10],
- ['nachl','Preis Nachlieferung','EUR',10],['betriebsstoff','Betriebsstoffe je Gerät','EUR',1],['geh_ek','Gehalt Einkauf','EUR',500],['geh_vw','Gehalt Verwaltung','EUR',500],['geh_fe','Gehalt Fertigung','EUR',500],['geh_fue','Gehalt F&E','EUR',500],['geh_vt','Gehalt Vertrieb','EUR',500],
- ['r_kurz','Zins kurzfr. Kredit (vor Rating)','Anteil',0.005],['r_lang','Zins langfr. Kredit (vor Rating)','Anteil',0.005],['r_ue','Zins Überziehung (vor Rating)','Anteil',0.005],['r_wp','Zins Wertpapiere','Anteil',0.005],
- ['ga_preis','Großabnehmer: Preis','EUR',10],['ga_max','Großabnehmer: max. Menge','Stück',500],['aus_menge','Ausschreibung Vorperiode: Zuschlag Menge','Stück',500],['aus_preis','Ausschreibung Vorperiode: Zuschlagspreis','EUR',10]];
-const LABEL = {}; FIELDS.forEach(([,fs])=>fs.forEach(f=>{ if(f!=='TYPED') LABEL[f[0]]=f[1]; })); TYPED.forEach(([k,l])=>TY.forEach(t=>LABEL[k+'_'+t]=l+' Typ '+t));
-
-// Was das Modell je Entscheidung rechnet und was nicht (Handbuch)
-const WIRK = {
- preis:'Nachfrage über Preis-Absatz-Funktion (Elastizität geschätzt, ±5 % reaktionsarm). Nicht im Modell: Kundenzufriedenheit sinkt bei Preiserhöhung.',
- werbung:'≈ +2.000 Stück je MEUR um 6 MEUR (Handbuch). Nicht im Modell: abnehmender Grenznutzen, Nachwirkung in Folgeperioden, Konkurrenzbudgets.',
- vertrieb:'≈ +200 Stück je MA (Handbuch), Gehalt und Einstellungskosten. Nicht im Modell: Nachwirkung.',
- ci:'Nur Kosten. Nicht im Modell: Bekanntheit → Marktanteil (langfristig, Handbuch ≈ 3 MEUR angemessen).',
- mf:'0,1 MEUR. Liefert Konkurrenzdaten für die Nachfrageschätzung.',
- tech:'F&E-Gehälter. Nicht im Modell: Technologieindex → Marktanteil, mehr Nacharbeit und Einkaufspersonal.',
- oeko:'Nur Kosten. Nicht im Modell: Ökologieindex → Marktanteil, mehr Nacharbeit.',
- wa:'Nur Kosten. Wirkung über Annahme „Wertanalyseindex“ (weniger Einsatzstoffe je Gerät), mehr Nacharbeit nicht im Modell.',
- ga:'Umsatz zum Großabnehmerpreis, Lieferung vor Markt 1, ohne Transportkosten, Zahlung sofort.',
- aus:'Wirkt erst nächste Periode (Lieferung und Zahlung). Niedrigstes Gebot gewinnt.',
- einkauf:'Staffelpreis, Nachlieferung +20 % bei Fehlmenge, Lagerkosten 50 EUR je Einheit.',
- fm:'Kapazität, Überstunden (+2,5 MEUR Zusatzschicht über 100 %), Lager, Herstellkosten je Stück. Nicht im Modell: mehr Nacharbeit bei Überstunden.',
- inv:'Kapazität sofort, AfA, Fixkosten, Umweltindex, Auszahlung sofort.',
- des:'Resterlös 20/25/30 % des Restbuchwerts, außerordentliche AfA, Umweltindex.',
- ih:'Verfügbarkeitsgrad nach Handbuchtabelle (S. 22).',
- rat:'Nur Kosten. Wirkung über Annahme „Rationalisierungsfaktor“ (Höhe je MEUR unbekannt, wirkt dauerhaft).',
- po:'Produktivität +4 % bei 2,5 MEUR (Handbuch, Annahme änderbar). Nicht im Modell: mehr Fehlzeiten.',
- training:'Nur Kosten. Nicht im Modell: Qualifikation → Produktivität, weniger Fehlzeiten (über Annahme „Sonstige Produktivitätsänderung“).',
- umwelt:'Umweltindikator ↑, Umweltabgabe ↓, AfA über 10 Perioden. Nicht im Modell: Kundenzufriedenheit, Fehlzeiten.',
- pnk:'Personalnebenkosten aller Mitarbeiter. Nicht im Modell: weniger Fluktuation, Fehlzeiten, Nacharbeit.',
- pers:'Personalkapazität, Einstellungs-/Entlassungskosten, Sozialplan. Nicht im Modell: Einarbeitung und Motivation.',
- kurz:'Kasse und Zinsen, Rückzahlung nächste Periode.',
- lang:'10 Perioden, nicht tilgbar, Zins fest.',
- wp:'Zinsertrag, Rückfluss nächste Periode.',
- div:'Höchstens Gewinnvortrag. Nicht im Modell: Aktienkurs ↑, Rating ↓ bei Kreditfinanzierung.'
-};
-
-let PER, D, S;       // alle Perioden, aktuelle Datenbasis, Zustand
-const KEY = 'topsim-spielwiese-v2';
-// Anzeige: immer 2 Nachkommastellen; ganze Stückzahlen ohne Nachkommastellen
-const EPS=0.005;
-const nf=(x,d=0)=>{ if(x==null||isNaN(x)||!isFinite(x)) return '–'; const y=Math.round(x*100)/100; const ganz=d===0&&Math.abs(y-Math.round(y))<1e-9;
-  return (Math.abs(y)<1e-9?0:y).toLocaleString('de-DE',{minimumFractionDigits:ganz?0:2,maximumFractionDigits:ganz?0:2}); };
-const sg=(x,d=0)=>(x>0?'+':x<0?'−':'±')+nf(Math.abs(x),d);
-const pct=(x,d=1)=>nf(x*100,d)+' %';
-const $=id=>document.getElementById(id);
-const grp=g=>g==='form'?S.F:g==='an'?S.A:S.Q;
-
-function defaults(){ const B=D.B; return {F:M.formAus(B),A:M.kalibriere(B),Q:{...(D.prognose||{})}}; }
-// Datenstand: ändert sich bei neuer Periode oder korrigierten Daten → Eingaben starten neu von der Basis
-const stand=()=>D.periode+'|'+JSON.stringify(D.prognose||{})+'|'+JSON.stringify(D.berichte||{}).length;
-function fresh(){ const d=defaults(); return {per:stand(),F:d.F,A:d.A,Q:d.Q,last:null,undo:[]}; }
-function save(){ try{ localStorage.setItem(KEY,JSON.stringify({per:S.per,F:S.F,A:S.A,Q:S.Q})); }catch(e){} }
-function load(){ try{ const j=JSON.parse(localStorage.getItem(KEY)); if(!j||j.per!==stand()) return null; const d=defaults();
-  return {per:j.per,F:{...d.F,...j.F},A:{...d.A,...j.A},Q:{...d.Q,...j.Q},last:null,undo:[]}; }catch(e){ return null; } }
-const calc=(F=S.F,A=S.A,Q=S.Q)=>M.modell(D.B,F,A,Q);
-// Basis = immer die hochgeladenen Daten der aktuellen Periode (Entscheidungen TNB19, Prognose, kalibrierte Annahmen)
-let BASE=null; const baseOf=()=>BASE;
-
-function inp(g,key,step,val){ if(step===null){ const opts=['Ja','Nein']; return `<select id="${g}-${key}" data-g="${g}" data-k="${key}">${opts.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select>`; }
-  return `<input id="${g}-${key}" data-g="${g}" data-k="${key}" type="number" inputmode="decimal" step="${step}" value="${val==null?'':val}">`; }
-function renderForm(){
-  let h='';
-  for(const [sec,fs] of FIELDS){
-    h+=`<section><h2>${sec}</h2>`;
-    for(const f of fs){
-      if(f==='TYPED'){ h+=`<div class="row t head"><span>Fertigungsanlagen</span>${TY.map(t=>`<span style="text-align:center">Typ ${t}</span>`).join('')}</div>`;
-        for(const [k,l,st] of TYPED) h+=`<div class="row t"><label>${l}</label>${TY.map(t=>inp('form',k+'_'+t,st,S.F[k+'_'+t])).join('')}</div>`; continue; }
-      const [k,l,u,st]=f; h+=`<div class="row"><label for="form-${k}">${l}</label>${inp('form',k,st,S.F[k])}<span class="u">${u}</span></div>`;
-    }
-    h+='</section>';
-  }
-  h+=`<details><summary>Wirtschaftsnachrichten P${D.periode+1}</summary>${NEWS.map(([k,l,u,st])=>`<div class="row"><label for="pp-${k}">${l}</label>${inp('pp',k,st,S.Q[k])}<span class="u">${u}</span></div>`).join('')}
-   <p class="note" style="padding:0 12px">Anteile als Dezimalzahl (0,05 = 5 %). Zinsen ohne Ratingeffekt, der wird automatisch addiert.</p></details>`;
-  h+=`<details><summary>Annahmen (aus Berichten kalibriert)</summary>${Object.entries(M.ANNAHMEN).map(([k,[l,u,st,src]])=>`<div class="row"><label for="an-${k}">${l}<span class="src${/Schätzung/.test(src)?' est':''}">${src}</span></label>${inp('an',k,st,S.A[k])}<span class="u">${u}</span></div>`).join('')}
-   <p class="note" style="padding:0 12px">Gelb = Schätzung ohne Datengrundlage. Wie stark das Ergebnis an jeder Annahme hängt, zeigt der Reiter „Wirkung je Entscheidung“.</p></details>`;
-  $('form').innerHTML=h; markChanged();
-}
-
-function status(r,sc){
-  const R=M.R,F=S.F,Q=S.Q,a={};
-  a.anl=[r.ausl_anl>1+R.ues_anl?'R':(r.ausl_anl>R.a_ausl_gelb||r.ausl_anl<R.a_ausl_unter?'Y':'G'),'Anlagen',`Auslastung ${pct(r.ausl_anl)}`+(r.ausl_anl>1+R.ues_anl?` – nicht produzierbar, Fehlmenge ${nf(Math.max(0,r.fm_plan-r.kap_ues))} Stück`:r.ausl_anl>1?' – Überstunden: +2,50 MEUR Zusatzschicht':r.ausl_anl<R.a_ausl_unter?' – Unterauslastung':'')+(TY.some(t=>r['n_'+t]>0&&(+F['ih_'+t]||0)<0.1)?' · Instandhaltung fehlt (50 %)':'')];
-  a.pers=[r.ausl_pers>1+R.ues_pers?'R':(r.ausl_pers>1||r.ausl_pers<R.a_ausl_unter?'Y':'G'),'Personal',`Auslastung ${pct(r.ausl_pers)}`+(r.ausl_pers>1+R.ues_pers?` – ca. ${nf((r.fm_plan-r.pers_kap_ues)/r.prod)} MA fehlen`:r.ausl_pers>1?` – Überstunden ${nf(r.ot_ma,1)} MA`:r.ausl_pers<R.a_ausl_unter?` – ca. ${nf(r.einsetzbar-r.fm_plan/r.prod)} MA zu viel`:'')];
-  a.es=[r.nachl>0?'R':(r.es_end>R.a_es_end*r.bedarf?'Y':'G'),'Einsatzstoffe',r.nachl>0?`Nachlieferung ${nf(r.nachl)} Einh. (Mehrkosten ${nf(r.nachl_mehr,2)} MEUR)`:`Endbestand ${nf(r.es_end)} Einh.`+(r.es_end>R.a_es_end*r.bedarf?' – hoch':'')];
-  const gaf=(+F.ga||0)>0&&!(+Q.ga_preis>0), gam=(+F.ga||0)>r.ga_max;
-  a.lief=[r.ngn>0||gaf||gam?'R':(r.fe_end>R.a_fe_end*r.fe_abg||Math.abs(r.dev)>R.band?'Y':'G'),'Lieferfähigkeit',(gaf?'Großabnehmerpreis fehlt · ':'')+(gam?`Großabnehmer max. ${nf(r.ga_max)} Stück · `:'')+(r.ngn>0?`Fehlmenge ${nf(r.ngn)} Stück`:`lieferfähig, Endbestand ${nf(r.fe_end)} Stück`)+(Math.abs(r.dev)>R.band?' · Preis außerhalb ±5 % (Schätzung unsicher)':'')];
-  a.kasse=[r.ueberz>0?'R':(r.kasse>R.a_kasse_max||(+F.kurz||0)>r.ek_vp?'Y':'G'),'Kasse',r.ueberz>0?`Überziehung ${nf(r.ueberz,2)} MEUR – Kredit +${nf(r.kreditbedarf,2)} MEUR nötig`:`Ende ${nf(r.kasse,2)} MEUR`+(r.kasse>R.a_kasse_max?' – mehr Kredit als nötig':'')+((+F.kurz||0)>r.ek_vp?' · Kredit über EK':'')];
-  a.pue=[r.pue<0?'R':(r.pue<r.pue_vp||(+F.div||0)>r.div?'Y':'G'),'Periodenüberschuss',`${nf(r.pue,2)} MEUR (Vorperiode ${nf(r.pue_vp,2)})`+((+F.div||0)>r.div?' · Dividende begrenzt':'')];
-  a.ekq=[r.ekq<R.a_ekq_rot?'R':(r.ekq<R.a_ekq_gelb?'Y':'G'),'EK-Quote',pct(r.ekq)];
-  a.umw=[r.umw_ind<R.a_umw_rot?'R':(r.umw_ind<R.umw_norm?'Y':'G'),'Umwelt',`Indikator ${nf(r.umw_ind,2)}`+(r.umw_ind<R.umw_norm?` – Abgabe ${nf(r.umw_abg,2)} MEUR`:' – Norm erfüllt')];
-  const p=sc.pess,o=sc.opt, rp=[];
-  if(p.ueberz>0&&r.ueberz===0) rp.push(`pessimistisch Überziehung ${nf(p.ueberz,2)} MEUR`);
-  if(o.ngn>0&&r.ngn===0) rp.push(`optimistisch Fehlmenge ${nf(o.ngn)} Stück`);
-  if(p.pue<0&&r.pue>=0) rp.push('pessimistisch Verlust');
-  a.rob=[rp.length?'Y':'G','Robustheit',rp.length?rp.join(' · '):`hält bei Nachfrage ±${pct(+S.A.unsicherheit||0,0)}`];
-  { const B0=baseOf().F, d=k=>(+F[k]||0)-(+B0[k]||0), w=[];
-    const neuQ=r.neu_quote, neuB=base.neu_quote;
-    if(Math.abs(neuQ-neuB)>0.005||neuQ>0.1) w.push(`Einstellungen ${pct(neuQ,1)} des Bestands (P0: ${pct(neuB,1)}): Einarbeitung kann die Produktivität senken, im Modell konstant`);
-    if(F.pers<0&&-F.pers>0) w.push('Entlassungen senken die Motivation (zeitverzögert), im Modell nicht berücksichtigt');
-    if(d('training')) w.push(`Training ${d('training')>0?'↑':'↓'}: Qualifikation und Fehlzeiten ändern sich, im Modell nicht berücksichtigt`);
-    if(d('pnk')) w.push(`Personalnebenkosten ${d('pnk')>0?'↑':'↓'}: Fluktuation und Fehlzeiten ändern sich, im Modell nicht berücksichtigt`);
-    if(d('po')) w.push('Prozessoptimierung: Produktivität +4 % je 2,5 MEUR ist modelliert, höhere Fehlzeiten nicht');
-    if(['A','B','C'].some(t=>d('rat_'+t))||['A','B','C'].some(t=>+F['rat_'+t]>0)) w.push('Rationalisierung: Kosten sind enthalten, der Kapazitätszuwachs nicht (Faktor bleibt 1,00)');
-    if(r.ausl_pers>0.98&&r.ausl_pers<=1) {} 
-    if(w.length) a.unsicher=['Y','Nicht im Modell',w.join(' · ')+'. Die Personalauslastung kann deshalb abweichen.'];
-  }
-  return a;
-}
-
-const GOOD={nachfrage:1,absatz:1,umsatz:1,hk_stk:-1,sk_stk:-1,k_sum:-1,be:1,pue:1,ekr:1,ocf:1,kasse:1,ueberz:-1,ekq:1,umw_abg:-1,ngn:-1};
-const cls=(k,v)=>Math.abs(v)<EPS?'mute':!GOOD[k]?'':(v*GOOD[k]>0?'pos':'neg');
-const KPI=[['nachfrage','Nachfrage (Schätzung)','Stück',0],['absatz','Absatz Markt 1','Stück',0],['umsatz','Umsatz','MEUR',2],['fert_ist','Fertigung','Stück',0],['ausl_anl','Auslastung Anlagen','%',1],['ausl_pers','Auslastung Personal','%',1],
- ['prod','Produktivität je MA','Stück',2],['hk_stk','Herstellkosten je Stück','EUR',2],['sk_stk','Selbstkosten je Stück','EUR',2],['k_sum','Kosten gesamt','MEUR',2],['db1','Deckungsbeitrag I','MEUR',2],['be','Betriebsergebnis','MEUR',2],['pue','Periodenüberschuss','MEUR',2],['ekr','EK-Rendite','%',2],
- ['ocf','Operativer Cashflow','MEUR',2],['kasse','Kassenendbestand','MEUR',2],['ueberz','Überziehungskredit','MEUR',2],['ekq','EK-Quote','%',1],['fe_end','Lager Fertigprodukte','Stück',0],['es_end','Lager Einsatzstoffe','Einh.',0],['umw_ind','Umweltindikator','Index',2],['umw_abg','Umweltabgabe','MEUR',2],['pers_gesamt','Personal gesamt','MA',0]];
-const fmtK=(v,u,d)=>u==='%'?pct(v,d):nf(v,d)+(u==='MEUR'?' MEUR':'');
-const dK=(v,u,d)=>u==='%'?sg(v*100,d)+' %-P.':sg(v,d);
-
-// Planberichte in TOPSIM-Gliederung: [Bezeichnung, Wert (Schlüssel oder Funktion), Einheit, Nachkommastellen, besser wenn (+1 höher, -1 niedriger, 0 neutral)]
-const PB=[
- ['Absatz und Umsatz (TNB01/02/10)',[
-  ['Nachfrage Modell','nachfrage_modell','Stück',0,1],['davon Preiseffekt (Faktor)','preiseffekt','',3,0],['davon Werbeeffekt','werbeeffekt','Stück',0,0],['davon Vertriebseffekt','vertriebseffekt','Stück',0,0],
-  ['Nachfrage (verwendet)','nachfrage','Stück',0,1],['Absatz Markt 1','absatz','Stück',0,1],['Lieferung Großabnehmer','ga_lief','Stück',0,0],['Lieferung Ausschreibung','aus_lief','Stück',0,0],['Nicht lieferbar','ngn','Stück',0,-1],
-  ['Umsatz Markt 1','umsatz_m1','MEUR',2,1],['Umsatz Großabnehmer','umsatz_ga','MEUR',2,1],['Umsatz Ausschreibung','umsatz_aus','MEUR',2,1],['Umsatz gesamt','umsatz','MEUR',2,1]]],
- ['Fertigung (TNB03)',[
-  ['Anlagen im Einsatz',r=>r.anl.length,'Stück',0,0],['Normale Kapazität','kap_norm','Stück',0,0],['Verfügbare Kapazität','kap','Stück',0,1],['Kapazität mit Überstunden','kap_ues','Stück',0,1],
-  ['Personal Fertigung Ende','pers_end','MA',0,0],['Fehlzeiten','fehl','MA',0,-1],['Einsetzbares Personal','einsetzbar','MA',0,0],['Produktivität je MA','prod','Stück',2,1],['Personalkapazität','pers_kap','Stück',0,1],
-  ['Geplante Fertigungsmenge','fm_plan','Stück',0,0],['Tatsächliche Fertigung','fert_ist','Stück',0,0],['Nicht fertigbar','fert_fehl','Stück',0,-1],['Auslastung Anlagen','ausl_anl','%',1,0],['Auslastung Personal','ausl_pers','%',1,0],
-  ['Überstunden (MA-Äquivalent)','ot_ma','MA',1,-1],['Zusatzschicht','zusatzschicht','MEUR',2,-1],['Umweltindex Anlagen','umw_anl','Index',2,1],['Umweltbelastungsindikator','umw_ind','Index',2,1],['Umweltabgabe','umw_abg','MEUR',2,-1]]],
- ['Lager (TNB05)',[
-  ['Einsatzstoffe Anfang','es_anf','Einh.',0,0],['Einkauf','einkauf','Einh.',0,0],['Einkaufspreis','ek_preis','EUR',2,-1],['Nachlieferung (+20 %)','nachl','Einh.',0,-1],['Verbrauch','bedarf','Einh.',0,0],
-  ['Einsatzstoffe Ende','es_end','Einh.',0,0],['Einsatzstoffe Ende (Wert)','es_end_val','MEUR',2,0],['Fertigprodukte Anfang','fe_anf_qty','Stück',0,0],['Abgang an Vertrieb','fe_abg','Stück',0,0],
-  ['Fertigprodukte Ende','fe_end','Stück',0,0],['Fertigprodukte Ende (Wert)','fe_end_val','MEUR',2,0],['Lagerkosten','k_lager','MEUR',2,-1]]],
- ['Personal (TNB06)',[
-  ...['Einkauf','Verwaltung','Fertigung','F&E','Vertrieb'].flatMap((l,j)=>[[`${l}: Endbestand`,r=>r.P[j].end,'MA',0,0],[`${l}: Einst./Entl.`,r=>r.P[j].einst-r.P[j].entl,'MA',0,0],[`${l}: Kosten`,r=>r.P[j].sum,'MEUR',2,-1]]),
-  ['Personal gesamt','pers_gesamt','MA',0,0],['Personalkosten gesamt','pers_kosten','MEUR',2,-1]]],
- ['Kostenarten (TNB07)',[...M.KOSTEN.map(([k,l])=>[l,k,'MEUR',2,-1]),['Summe Kosten','k_sum','MEUR',2,-1]]],
- ['Kostenträger (TNB09)',[
-  ['Einkauf (Einzel + Gemein)',r=>r.E[0]+r.G[0],'MEUR',2,-1],['Fertigung (Einzel + Gemein)',r=>r.E[1]+r.G[1],'MEUR',2,-1],['Herstellkosten','hk','MEUR',2,-1],['Herstellkosten je Stück','hk_stk','EUR',2,-1],
-  ['Herstellkosten des Umsatzes','hkdu','MEUR',2,0],['F&E','kost_fue','MEUR',2,-1],['Vertrieb','kost_vt','MEUR',2,-1],['Verwaltung','kost_vw','MEUR',2,-1],['Selbstkosten','sk','MEUR',2,0],['Selbstkosten je Stück','sk_stk','EUR',2,-1]]],
- ['Deckungsbeiträge (TNB10)',[['DB I','db1','MEUR',2,1],['DB II','db2','MEUR',2,1],['DB III','db3','MEUR',2,1],['DB IV','db4','MEUR',2,1],['DB V = Betriebsergebnis','db5','MEUR',2,1],
-  ['DB I je Stück',r=>r.fe_abg?r.db1*1e6/r.fe_abg:0,'EUR',2,1]]],
- ['GuV (TNB11)',[['Umsatzerlöse','umsatz','MEUR',2,1],['Bestandsveränderung','bestv','MEUR',2,0],['Materialaufwand','g_mat','MEUR',2,-1],['Personalaufwand','g_pers','MEUR',2,-1],['Abschreibungen','g_afa','MEUR',2,-1],
-  ['Sonstiger Aufwand','g_sonst','MEUR',2,-1],['Betriebsergebnis','be','MEUR',2,1],['Wertpapiererträge','wp_ertr','MEUR',2,1],['Zinsen Kredite','zins_kl','MEUR',2,-1],['Zinsen Überziehung','zins_ue','MEUR',2,-1],
-  ['Gewinn vor Steuern','egt','MEUR',2,1],['Steuern','steuern','MEUR',2,-1],['Periodenüberschuss','pue','MEUR',2,1],['Dividende','div','MEUR',2,0],['Gewinnvortrag neu','vortrag_neu','MEUR',2,1]]],
- ['Liquidität (TNB12)',[['Kassenanfang','l_anf','MEUR',2,0],['Einz. Umsatz akt. Periode','ez_akt','MEUR',2,1],['Einz. Umsatz Vorperiode','ez_vp','MEUR',2,0],['Verkauf Wertpapiere','ez_wp','MEUR',2,0],['Zinserträge','wp_ertr','MEUR',2,1],
-  ['Desinvestitionen','resterloes','MEUR',2,0],['Aufnahme Kredite','ez_kredit','MEUR',2,0],['Überziehungskredit','ueberz','MEUR',2,-1],['Summe Einzahlungen','ez_sum','MEUR',2,0],
-  ['Ausz. Material','az_mat','MEUR',2,-1],['Ausz. Personal (ohne BAV)','az_pers','MEUR',2,-1],['Ausz. sonstige Aufwendungen','az_sonst','MEUR',2,-1],['Rückzahlung Kredite','az_tilg','MEUR',2,0],['Zinsen Kredite','zins_kl','MEUR',2,-1],
-  ['Kauf Anlagen','az_inv','MEUR',2,0],['Kauf Wertpapiere','az_wp','MEUR',2,0],['Kauf Umweltanlagen','az_umw','MEUR',2,0],['Dividende','div','MEUR',2,0],['Steuern','steuern','MEUR',2,-1],['Zinsen Überziehung','zins_ue','MEUR',2,-1],
-  ['Summe Auszahlungen','az_sum','MEUR',2,0],['Kassenende','kasse','MEUR',2,0],['Zusätzlicher Kredit nötig','kreditbedarf','MEUR',2,-1]]],
- ['Cashflow (TNB14)',[['Periodenüberschuss','pue','MEUR',2,1],['+ Abschreibungen','g_afa','MEUR',2,0],['+ Pensionsrückstellungen','k_pens','MEUR',2,0],['Traditioneller Cashflow','cf_trad','MEUR',2,1],
-  ['± Vorräte Material','cf_mat','MEUR',2,1],['± Vorräte Fertigprodukte','cf_fe','MEUR',2,1],['± Forderungen','cf_ford','MEUR',2,1],['A. Operativer Cashflow','ocf','MEUR',2,1],['B. Investitionen','icf','MEUR',2,0],
-  ['C. Finanzierung','fcfin','MEUR',2,0],['Veränderung Kasse','d_kasse','MEUR',2,0],['Free Cashflow','fcf','MEUR',2,1]]],
- ['Bilanz (TNB15)',[['Grundstücke und Bauten','bi_grund','MEUR',2,0],['Maschinen','bi_masch','MEUR',2,0],['Materialien','es_end_val','MEUR',2,0],['Fertige Erzeugnisse','fe_end_val','MEUR',2,0],['Forderungen','bi_ford','MEUR',2,0],
-  ['Wertpapiere',()=>+S.F.wp||0,'MEUR',2,0],['Kasse','kasse','MEUR',2,0],['Bilanzsumme','bi_akt','MEUR',2,0],['Eigenkapital','bi_ek','MEUR',2,1],['Pensionsrückstellungen','bi_pens','MEUR',2,0],
-  ['Langfristige Kredite','bi_lang','MEUR',2,0],['Kurzfristige Kredite',()=>+S.F.kurz||0,'MEUR',2,0],['Überziehungskredit','ueberz','MEUR',2,-1]]],
- ['Kennzahlen (TNB17/18)',[['EK-Rendite','ekr','%',2,1],['Umsatzrendite','ur','%',2,1],['EK-Quote','ekq','%',1,1],['FK-Quote','fkq','%',1,-1],['EBIT','ebit','MEUR',2,1],['EBITDA','ebitda','MEUR',2,1]]]];
-const pv=(r,a)=>typeof a==='function'?a(r):r[a];
-const fmtU=(v,u,d)=>u==='%'?pct(v,d):nf(v,d)+(u==='MEUR'?' MEUR':'');
-const dU=(v,u,d)=>u==='%'?sg(v*100,d)+' %-P.':sg(v,d);
-const tolU=u=>u==='%'?0.00005:EPS;
-const clsG=(v,gd)=>!gd?'':(v*gd>0?'pos':'neg');
-function diffs(rA,rB){ return PB.map(([t,rows])=>[t,rows.map(([l,a,u,d,gd])=>{const v=pv(rB,a)-pv(rA,a);return Math.abs(v)>tolU(u,d)?[l,v,u,d,gd]:null;}).filter(Boolean)]).filter(x=>x[1].length); }
-let cur, base, sc, tabSel='pb';
-const g0=k=>+(D.B[k]?.[0]??D.B[k]);
-function vorperiodeIst(){ return {...DT.backtest(PER,PER.indexOf(D),true).r,...DT.istWerte(D.B)}; }
-const num=v=>v==null||v===''?null:(isNaN(+v)?String(v):+v);
-function geaendert(){ const B0=baseOf(); return ['F','A','Q'].some(k=>{ const a=S[k]||{},b=B0[k]||{}; return [...new Set([...Object.keys(a),...Object.keys(b)])].some(x=>num(a[x])!==num(b[x])); }); }
-let VP=null; // Vorperiode: Ist-Entscheidungen und Ist-Absatz nachgerechnet (entspricht dem Sammelbericht)
-
-function render(){
-  sc=M.szenarien(D.B,S.F,S.A,S.Q); cur=sc.basis; const B0=baseOf(); base=M.modell(D.B,B0.F,B0.A,B0.Q);
-  const np=D.periode+1; if(!VP) VP=vorperiodeIst(); const aend=geaendert(); const V=cur;
-  $('sub').textContent=`Unternehmen 1 · Copy Classic · Ist P${D.periode} → Planung P${np} · Daten: ${D.quelle||'p'+D.periode+'.json'}`;
-  $('pueK').textContent=`Periodenüberschuss P${np} (Plan)`;
-  $('pue').textContent=nf(V.pue,2)+' MEUR';
-  const dp=cur.pue-base.pue; const pd=$('pueD'); pd.textContent=(Math.abs(dp)<EPS?'wie Basis (P0-Entscheidungen, neue Wirtschaftsnachrichten)':`${sg(dp,2)} MEUR ggü. Basis`)+` · P${D.periode} Ist: ${nf(VP.pue,2)}`; pd.className='d '+(dp>EPS?'pos':dp<-EPS?'neg':'mute');
-  $('kasse').innerHTML=nf(V.kasse,2)+'<small> MEUR</small>'; $('ekr').textContent=pct(V.ekr,2); $('abs').textContent=nf(V.absatz);
-  const R=M.R, mx=1.25;
-  const meter=(lab,x,sub)=>`<div class="meter"><div class="lab"><span>${lab}</span><b>${pct(x)}</b></div><div class="track"><div class="fill" style="width:${Math.min(100,x/mx*100)}%;background:${x>1+R.ues_anl?'var(--r)':x>1?'var(--y)':'var(--teal)'}"></div><div class="mk" style="left:${100/mx}%"></div><div class="mk r" style="left:${(1+R.ues_anl)/mx*100}%"></div></div><div class="note">${sub}</div></div>`;
-  $('meters').innerHTML=meter('Anlagen',cur.ausl_anl,`Kapazität ${nf(V.kap)} Stück`)+meter('Personal',cur.ausl_pers,`Plan P${np}: ${nf(V.einsetzbar)} einsetzbare MA × ${nf(cur.prod,2)}`)+`<div class="note">Strich = 100 %, rot = 110 % (Grenze mit Überstunden)</div>`;
-  // Szenarien
-  const pl={absatz:cur.absatz,ekr:cur.ekr,ocf:cur.ocf};
-  const S3=[sc.pess,sc.basis,sc.opt];
-  const SR=[['Nachfrage','nachfrage','Stück',0],['Absatz Markt 1','absatz','Stück',0],['Nicht lieferbar','ngn','Stück',0],['Lager Fertigprodukte Ende','fe_end','Stück',0],['Umsatz','umsatz','MEUR',2],['Periodenüberschuss','pue','MEUR',2],['Kasse Ende','kasse','MEUR',2],['Überziehungskredit','ueberz','MEUR',2],['EK-Rendite','ekr','%',2]];
-  $('scen').innerHTML=`<tr><th></th><th>Pessimistisch</th><th>Basis</th><th>Optimistisch</th></tr>`+SR.map(([l,k,u,d])=>`<tr><td>${l}</td>${S3.map(r=>`<td>${fmtK(r[k],u,d)}</td>`).join('')}</tr>`).join('')+
-    `<tr><td>Planungsqualität, wenn es so kommt</td>${S3.map(r=>`<td>${nf(M.planungsqualitaet(pl,{absatz:r.absatz,ekr:r.ekr,ocf:r.ocf}).gesamt,1)}</td>`).join('')}</tr>`;
-  $('scenN').textContent=`Nachfrage ±${pct(+S.A.unsicherheit||0,0)} um die Schätzung (Annahme „Unsicherheit“). Gute Entscheidungen halten in allen drei Spalten: keine Überziehung, kein großer Lagerberg, keine Fehlmenge. Planwerte unten gelten für die Basis.`;
-  const a=status(cur,sc);
-  $('amps').innerHTML=Object.values(a).map(([s,l,m])=>`<div class="amp ${s}"><b>${{R:'ROT',Y:'GELB',G:'GRÜN'}[s]} · ${l}</b>${m}</div>`).join('');
-  const L=S.last;
-  if(L){ const before=L.res;
-    $('lastH').textContent=`Was hat sich geändert? ${L.label}: ${L.from} → ${L.to}`;
-    const ds=diffs(before,cur);
-    $('last').innerHTML=ds.length?ds.map(([t,rows])=>`<li style="grid-column:1/-1;border:0;padding-top:8px"><b>${t}</b></li>`+rows.map(([l,v,u,d,gd])=>`<li><span>${l}</span><b class="${clsG(v,gd)}">${dU(v,u,d)}</b></li>`).join('')).join(''):'<li><span class="mute">keine Wirkung auf die Planberichte im Modell</span></li>';
-    $('lastN').textContent=WIRK[L.k?.replace(/(\d)?_[ABC]$/,'')]||''; $('lastN').style.display=$('lastN').textContent?'':'none';
-  }
-  $('pw').innerHTML=[['Umsatz Markt 1',nf(cur.umsatz_m1,2)+' MEUR'],['EK-Rendite',nf(cur.ekr*100,2)+' %'],['Operativer Cashflow',nf(cur.ocf,2)+' MEUR'],['Geplanter Absatz',nf(cur.absatz)+' Stück']].map(([l,v])=>`<div>${l}<b>${v}</b></div>`).join('');
-  renderTab(); save();
-}
-
-// ---------- Reiter ----------
-function renderTab(){
-  const el=$('tab');
-  if(!VP) VP=vorperiodeIst();
-  if(tabSel==='pb') el.innerHTML=`<p class="note">Alle Berichte der Planperiode P${D.periode+1} in TOPSIM-Gliederung; links die abgeschlossene Periode P${D.periode} (Ist, exakt aus dem Sammelbericht). Basis P${D.periode+1} = P${D.periode}-Entscheidungen unverändert mit den neuen Wirtschaftsnachrichten. Basis = hochgeladene Daten der Periode (Entscheidungen aus TNB19, Wirtschaftsnachrichten, kalibrierte Annahmen). Geänderte Zeilen sind hinterlegt; grün = besser, rot = schlechter.</p>`+
-    PB.map(([t,rows])=>`<h3 style="margin:16px 0 4px;font-size:15px">${t}</h3><div class="scroll"><table><tr><th>Position</th><th>Vorperiode P${D.periode} (Ist)</th><th>Basis P${D.periode+1}</th><th>Jetzt P${D.periode+1}</th><th>Δ</th></tr>`+rows.map(([l,a,u,d,gd])=>{const b0=pv(base,a),c0=pv(cur,a),v=c0-b0,ch=Math.abs(v)>tolU(u,d);
-      return `<tr class="${ch?'chg':''}"><td>${l}</td><td class="mute">${fmtU(pv(VP,a),u,d)}</td><td>${fmtU(b0,u,d)}</td><td><b>${fmtU(c0,u,d)}</b></td><td class="${ch?clsG(v,gd):'mute'}">${ch?dU(v,u,d):'–'}</td></tr>`;}).join('')+'</table></div>').join('');
-  if(tabSel==='wirk') el.innerHTML=wirkung();
-  if(tabSel==='rech') el.innerHTML=rechnung(cur);
-  if(tabSel==='aus') el.innerHTML=ausblickHtml();
-  if(tabSel==='bt') el.innerHTML=backtestHtml();
-}
-
-function wirkung(){
-  const r0=cur, a0=M.ausblick(D.B,S.F,S.A,S.Q,r0).r;
-  const cols=[['absatz','Absatz',0],['umsatz','Umsatz',2],['pue','PÜ',2],['kasse','Kasse',2],['ausl_anl','Ausl. Anl.',1,'%'],['ausl_pers','Ausl. Pers.',1,'%'],['hk_stk','HK/Stück',0]];
-  const row=(label,stepTxt,r1,a1,note)=>`<tr><td>${label}${note?`<span class="src">${note}</span>`:''}</td><td>${stepTxt}</td>${cols.map(([k,,d,u])=>{const v=r1[k]-r0[k];return `<td class="${cls(k,v)}">${Math.abs(v)<EPS?'·':u==='%'?sg(v*100,d):sg(v,d)}</td>`;}).join('')}<td class="${cls('pue',a1.pue-a0.pue)}">${Math.abs(a1.pue-a0.pue)<EPS?'·':sg(a1.pue-a0.pue,2)}</td></tr>`;
-  const head=(extra)=>`<tr><th>Feld</th><th>Schritt</th>${cols.map(c=>`<th>Δ ${c[1]}</th>`).join('')}<th>Δ PÜ P${D.periode+2}</th></tr>`;
-  let h=`<p class="note">Jede Zeile: dieses eine Feld um einen Schritt erhöht, alles andere wie jetzt. Letzte Zahlenspalte: Wirkung auf den Periodenüberschuss der Periode danach (gleiche Entscheidungen wiederholt).</p><div class="scroll"><table>${head(true)}`;
-  const fields=[]; FIELDS.forEach(([,fs])=>fs.forEach(f=>{ if(f==='TYPED') TYPED.filter(x=>!/^des/.test(x[0])).forEach(([k,,st])=>TY.forEach(t=>fields.push([k+'_'+t,st,k]))); else if(f[3]!==null) fields.push([f[0],f[3],f[0]]); }));
-  for(const [k,st,wk] of fields){
-    if(/_[BC]$/.test(k)&&!(+S.F[k]>0)&&!cur['n_'+k.slice(-1)]&&!/^inv/.test(k)) continue;
-    const F1={...S.F,[k]:(+S.F[k]||0)+st}; const r1=calc(F1); const a1=M.ausblick(D.B,F1,S.A,S.Q,r1).r;
-    h+=row(LABEL[k],sg(st,st<1?1:0),r1,a1,/_[BC]$/.test(k)&&!/^inv/.test(k)?'':WIRK[wk]||'');
-  }
-  h+=`</table></div><h3 style="margin:18px 0 6px;font-size:15px">Annahmen: wie stark hängt das Ergebnis daran?</h3><div class="scroll"><table>${head(true)}`;
-  for(const [k,[l,u,st,src]] of Object.entries(M.ANNAHMEN)){
-    if(st==null||k==='absatz_manuell'||k==='unsicherheit') continue;
-    const A1={...S.A,[k]:(S.A[k]==null||S.A[k]===''?(k==='r_lang_alt'?+S.Q.r_lang:0):+S.A[k])+st}; const r1=calc(S.F,A1); const a1=M.ausblick(D.B,S.F,A1,S.Q,r1).r;
-    h+=row(l,sg(st,st<1?3:0),r1,a1,src);
-  }
-  { const A1={...S.A,absatz_manuell:cur.nachfrage+1000}; const r1=calc(S.F,A1); const a1=M.ausblick(D.B,S.F,A1,S.Q,r1).r; h+=row('Nachfrage','+1.000',r1,a1,'Wichtigste Unsicherheit – siehe Szenarien oben'); }
-  return h+'</table></div>';
-}
-
-function rechnung(r){
-  const z=(l,v,c='')=>`<tr class="${c}"><td>${l}</td><td>${nf(v,2)}</td></tr>`;
-  const kost=M.KOSTEN.map(([k,l])=>z(l,r[k])).join('')+z('Summe',r.k_sum,'sum');
-  const guv=z('Umsatzerlöse',r.umsatz)+z('± Bestandsveränderung',r.bestv)+z('− Materialaufwand',r.g_mat)+z('− Personalaufwand',r.g_pers)+z('− Abschreibungen',r.g_afa)+z('− Sonstiger Aufwand',r.g_sonst)+z('= Betriebsergebnis',r.be,'sum')+
-    z('+ Wertpapiererträge',r.wp_ertr)+z('− Zinsen Kredite',r.zins_kl)+z('− Zinsen Überziehung',r.zins_ue)+z('= Gewinn vor Steuern',r.egt,'sum')+z('− Steuern',r.steuern)+z('= Periodenüberschuss',r.pue,'sum');
-  const liq=z('Kassenanfang',r.l_anf)+z('+ Einzahlungen',r.ez)+z('+ Überziehungskredit',r.ueberz)+z('− Auszahlungen (ohne Steuern/Überz.-Zinsen)',r.az)+z('− Steuern',r.steuern)+z('− Zinsen Überziehung',r.zins_ue)+z('= Kassenende',r.kasse,'sum');
-  const bil=z('Grundstücke und Bauten',r.bi_grund)+z('Maschinen',r.bi_masch)+z('Materialien',r.es_end_val)+z('Fertige Erzeugnisse',r.fe_end_val)+z('Forderungen',r.bi_ford)+z('Wertpapiere',+S.F.wp||0)+z('Kasse',r.kasse)+z('Aktiva',r.bi_akt,'sum')+
-    z('Eigenkapital',r.bi_ek)+z('Pensionsrückstellungen',r.bi_pens)+z('Langfr. Verbindlichkeiten',r.bi_lang)+z('Kurzfr. Verbindlichkeiten',+S.F.kurz||0)+z('Überziehungskredit',r.ueberz)+z('Passiva',r.bi_pas,'sum');
-  const anl=`<tr><th>Anlage</th><th>Kapazität</th><th>Verfügb.</th><th>AfA</th><th>RBW Ende</th><th>Fixk.</th><th>Umw.</th></tr>`+r.anl.map((a,i)=>`<tr><td>Typ ${a.t}${a.neu?' (neu)':''}</td><td>${nf(a.kap)}</td><td>${pct(a.ihf*a.rat,0)}</td><td>${nf(a.afa,2)}</td><td>${nf(a.rbw,2)}</td><td>${nf(a.fix,2)}</td><td>${nf(a.umw,1)}</td></tr>`).join('');
-  const per=`<tr><th>Personal</th><th>Anfang</th><th>Fluk.</th><th>Einst.</th><th>Entl.</th><th>Ende</th><th>Kosten</th></tr>`+['Einkauf','Verwaltung','Fertigung','F&E','Vertrieb'].map((l,j)=>{const p=r.P[j];return `<tr><td>${l}</td><td>${nf(p.anf)}</td><td>${nf(p.fl)}</td><td>${nf(p.einst)}</td><td>${nf(p.entl)}</td><td>${nf(p.end)}</td><td>${nf(p.sum,2)}</td></tr>`;}).join('');
-  return `<h3>Anlagen</h3><div class="scroll"><table>${anl}</table></div><h3 style="margin-top:14px">Personal</h3><div class="scroll"><table>${per}</table></div><p class="note">Bilanzdifferenz der Planrechnung: ${r.bi_diff.toExponential(1)} (muss ≈ 0 sein).</p>`;
-}
-
-function ausblickHtml(){
-  const a=M.ausblick(D.B,S.F,S.A,S.Q,cur), r2=a.r, p1=D.periode+1, p2=D.periode+2;
-  const rows=[['Nachfrage (Schätzung)','nachfrage','Stück',0],['Absatz','absatz','Stück',0],['Fertigung','fert_ist','Stück',0],['Auslastung Anlagen','ausl_anl','%',1],['Auslastung Personal','ausl_pers','%',1],['Herstellkosten je Stück','hk_stk','EUR',2],['Kosten gesamt','k_sum','MEUR',2],['AfA gesamt','g_afa','MEUR',2],['Betriebsergebnis','be','MEUR',2],['Zinsen','zins_kl','MEUR',2],['Periodenüberschuss','pue','MEUR',2],['Kasse Ende','kasse','MEUR',2],['Überziehungskredit','ueberz','MEUR',2],['Eigenkapital','bi_ek','MEUR',2],['EK-Rendite','ekr','%',2],['Umweltabgabe','umw_abg','MEUR',2]];
-  return `<p class="note">P${p2}: dieselben Entscheidungen noch einmal (ohne neue Anlagen oder Desinvestitionen), Wirtschaftsnachrichten und Annahmen wie P${p1}, Nachfrage aus dem Modell. Zeigt Folgewirkungen: Kreditrückzahlung, Forderungen, Lager, AfA, Personalstand, Gewinnvortrag.</p>
-   <div class="scroll"><table><tr><th>Kennzahl</th><th>P${p1}</th><th>P${p2}</th></tr>${rows.map(([l,k,u,d])=>`<tr><td>${l}</td><td>${fmtK(cur[k],u,d)}</td><td>${fmtK(r2[k],u,d)}</td></tr>`).join('')}</table></div>`;
-}
-
-function backtestHtml(){
-  const i=PER.indexOf(D), bt=DT.backtest(PER,i,true);
-  let h=`<p class="note">Periode ${D.periode} mit unseren tatsächlichen Entscheidungen (TNB19) und dem tatsächlichen Absatz nachgerechnet und mit dem Sammelbericht verglichen. ${bt.inSample?'<b>Achtung P0:</b> Die Annahmen stammen aus derselben Periode, der Test prüft also nur die Rechenlogik. Ab P1 ist es ein echter Test.':'Die Annahmen stammen aus der Vorperiode – so wie bei der Planung.'}</p>`;
-  if(i>0){ const bn=DT.backtest(PER,i,false); const ist=+D.B.t01_absatz?.[0]; h+=`<p class="note"><b>Nachfrageschätzung:</b> Modell ${nf(bn.r.nachfrage)} Stück, tatsächlich ${nf(ist)} Stück (${sg(100*(bn.r.nachfrage/ist-1),1)} %).</p>`; }
-  const tol=u=>u==='MEUR'?0.05:u==='EUR'?5:u==='%'?0.2:1;
-  h+=`<div class="scroll"><table><tr><th>Position</th><th>Modell</th><th>Ist</th><th>Δ</th></tr>`+bt.zeilen.map(([l,u,m,ist,d])=>{const dv=m-ist;return `<tr class="${Math.abs(dv)>tol(u)?'bad':''}"><td>${l}</td><td>${nf(m,d)}</td><td>${nf(ist,d)}</td><td>${sg(dv,d)}</td></tr>`;}).join('')+'</table></div>';
-  const c=DT.konsistenz(D.B), bad=c.filter(x=>!x.ok);
-  h+=`<p class="note"><b>Prüfung der Berichtsdaten:</b> ${c.length-bad.length} von ${c.length} Rechenprüfungen bestanden${bad.length?' – fehlgeschlagen: '+bad.map(x=>x.name).join(', '):''}.</p>`;
-  return h;
-}
-
-// ---------- Bedienung ----------
-function markChanged(){ const B=baseOf();
-  document.querySelectorAll('#form [data-k]').forEach(el=>{const g=el.dataset.g,k=el.dataset.k,bv={form:B.F,an:B.A,pp:B.Q}[g][k]; el.classList.toggle('chg',String(bv??'')!==String(grp(g)[k]??''));}); }
-const label=el=>{const row=el.closest('.row'); const lb=row.querySelector('label'); const l=(lb.childNodes[0]?.textContent||lb.textContent).trim(); const t=el.dataset.k.match(/_([ABC])$/); return t&&el.closest('.t')?`${l} Typ ${t[1]}`:l;};
-let focusSnap=null;
-const form=$('form');
-const fmtV=v=>v==null?'leer':typeof v==='number'?nf(v):v;
-form.addEventListener('focusin',e=>{const el=e.target; if(!el.dataset.k) return; focusSnap={el,val:grp(el.dataset.g)[el.dataset.k],res:calc()};});
-form.addEventListener('input',e=>{const el=e.target; if(!el.dataset.k) return; const g=el.dataset.g,k=el.dataset.k;
-  if(!focusSnap||focusSnap.el!==el) focusSnap={el,val:grp(g)[k],res:calc()};
-  const v=el.tagName==='SELECT'?el.value:(el.value===''?null:+el.value); grp(g)[k]=v;
-  S.last={label:label(el),from:fmtV(focusSnap.val),to:fmtV(v),res:focusSnap.res,g,k,old:focusSnap.val};
-  markChanged(); render();});
-form.addEventListener('change',e=>{ if(S.last&&focusSnap&&focusSnap.el===e.target){ S.undo.push({g:S.last.g,k:S.last.k,v:S.last.old}); focusSnap={el:e.target,val:grp(S.last.g)[S.last.k],res:calc()}; }});
-$('undo').onclick=()=>{const u=S.undo.pop(); if(!u) return; const before=calc(); const now=grp(u.g)[u.k]; grp(u.g)[u.k]=u.v; const el=$(u.g+'-'+u.k); if(el) el.value=u.v??''; S.last={label:'Rückgängig '+(el?label(el):u.k),from:fmtV(now),to:fmtV(u.v),res:before,k:u.k}; markChanged(); render();};
-$('reset').onclick=()=>{const B=baseOf(); S.F={...B.F};S.A={...B.A};S.Q={...B.Q};S.last=null;S.undo=[]; renderForm(); clearLast(); render(); flash('Alle Eingaben auf die hochgeladenen Daten zurückgesetzt.');};
-function clearLast(){ $('last').innerHTML=''; $('lastN').textContent='Ändere ein Feld im Formular – hier erscheint, was es bewirkt (gegenüber dem Stand direkt davor).'; $('lastN').style.display=''; $('lastH').textContent='Was hat sich geändert?'; }
-$('copy').onclick=async()=>{const t=`Umsatz Markt 1: ${nf(cur.umsatz_m1,2)} MEUR\nEK-Rendite: ${nf(cur.ekr*100,2)} %\nOperativer Cashflow: ${nf(cur.ocf,2)} MEUR\nGeplanter Absatz: ${nf(cur.absatz)} Stück`;
-  try{await navigator.clipboard.writeText(t); $('copied').textContent='kopiert';}catch(e){$('copied').textContent='Kopieren nicht erlaubt – bitte abschreiben';}};
-$('tabs').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; tabSel=b.dataset.t; document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-selected',x===b)); renderTab();});
-function flash(t){const m=$('msg'); m.textContent=t; m.style.display='block'; clearTimeout(flash.t); flash.t=setTimeout(()=>m.style.display='none',6000);}
-
-async function start(){
-  try{
-    const idx=await (await fetch('data/index.json',{cache:'no-store'})).json();
-    const files=await Promise.all(idx.perioden.map(async n=>(await fetch(`data/p${n}.json`,{cache:'no-store'})).json()));
-    PER=DT.bereite(files); D=PER[PER.length-1];
-  }catch(e){ flash('Daten konnten nicht geladen werden ('+e.message+'). Die Seite muss über GitHub Pages oder einen Webserver laufen, nicht als Datei.'); return; }
-  BASE=defaults(); Object.freeze(BASE.F); Object.freeze(BASE.A); Object.freeze(BASE.Q);
-  const saved=load(); S=saved||fresh();
-  if(!saved&&localStorage.getItem(KEY)) flash(`Neue Berichte für Periode ${D.periode} geladen – Formular ist mit den Entscheidungen aus TNB19 vorbelegt.`);
-  renderForm(); render();
-}
-start();
-</script>
+<div class="layout">
+  <aside class="panel formular" id="formular"></aside>
+  <main class="inhalt">
+    <div class="kacheln" id="kacheln"></div>
+    <div class="panel box"><h2>Hinweise</h2><ul class="hinweise" id="hinweise"></ul></div>
+    <div class="panel"><div class="tabs" id="tabs"></div><div class="box" id="tabinhalt"></div></div>
+  </main>
+</div>
+<div class="rw-hg" id="rwhg"></div>
+<aside class="rw" id="rw"><div class="rw-kopf"><h2 id="rwtitel"></h2><button id="rwzu" aria-label="Schließen">×</button></div><div class="rw-body" id="rwbody"></div></aside>
+<script type="module" src="app.js"></script>
 </body>
 </html>

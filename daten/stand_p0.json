@@ -1,0 +1,48 @@
+{
+ "titel": "Stand Ende Periode 0 (Ausgangslage von Periode 1, nur für den Backtest)",
+ "periode": 0,
+ "quelle": "Sammelbericht Periode 0, Unternehmen 1",
+ "bilanz": {
+  "kasse": [0.85, "TNB15 P0"], "forderungen": [25.80, "TNB15 P0"], "wertpapiere": [0, "TNB15 P0"],
+  "kredit_kurz": [27.0, "TNB15 P0"], "ueberziehung": [0, "TNB15 P0"], "kredit_lang": [0, "TNB15 P0"], "zins_lang": [0, "-"],
+  "pensionen": [13.87, "TNB15 P0"], "gez_kapital": [15.0, "TNB15 P0"], "kapitalruecklage": [2.5, "TNB15 P0"], "gewinnruecklage": [7.5, "TNB15 P0"],
+  "gewinnvortrag": [6.27, "TNB11 P0"], "eigenkapital": [31.27, "TNB15 P0"], "grundstuecke": [7.75, "TNB15 P0"], "maschinen": [19.60, "TNB15 P0"],
+  "verlustvortrag": [0, "-"]
+ },
+ "lager": {
+  "es_menge": [15000, "TNB05 P0"], "es_wert": [7.91, "TNB05 P0"], "fe_menge": [5000, "TNB05 P0"], "fe_wert": [10.23, "TNB05 P0"]
+ },
+ "personal": {"ek": [18, "TNB06 P0"], "vw": [208, "TNB06 P0"], "fe": [852, "TNB06 P0"], "fue": [35, "TNB06 P0"], "vt": [100, "TNB06 P0"]},
+ "fluktuation": {"hinweis": "Fluktuation P0 / Anfangsbestand P0", "ek": [1, 18], "vw": [8, 200], "fe": [51, 853], "fue": [1, 34], "vt": [9, 100]},
+ "fertigung": {
+  "fehlzeiten": [47, 852, "TNB03 P0"],
+  "nacharbeit": [1.23, 40000, "TNB07 P0"],
+  "nacharbeit_vp": [1.23, 40000, "keine Vorperiode bekannt"],
+  "motivationsindex": [1.000, "TNB03 P0"],
+  "produktivitaet": [50.02, "TNB03 P0"],
+  "kum_fertigung": [40000, "TNB03"],
+  "po_budget": [0, "TNB03 P0"], "training": [1000, "TNB03 P0"],
+  "umwelt_kum": [1.5, "TNB03 P0"],
+  "wa_index": [1.00, "TNB04 P0"], "wa_index_vp": [1.00, "keine Vorperiode bekannt"],
+  "tech_index": [100.0, "TNB04 P0"], "oeko_index": [100.0, "TNB04 P0"]
+ },
+ "anlagen": [
+  {"typ": "A", "nr": 1, "bp": -8, "bw": 12.5, "rlz": 1, "afa": 1.25, "rbw": 1.25, "fix": 1.5, "norm": 8000, "umw": 83, "q": "TNB03 P0"},
+  {"typ": "A", "nr": 2, "bp": -7, "bw": 15.0, "rlz": 2, "afa": 1.5, "rbw": 3.0, "fix": 1.0, "norm": 9000, "umw": 90, "q": "TNB03 P0"},
+  {"typ": "A", "nr": 3, "bp": -6, "bw": 20.0, "rlz": 3, "afa": 2.0, "rbw": 6.0, "fix": 0.5, "norm": 11500, "umw": 95, "q": "TNB03 P0"},
+  {"typ": "A", "nr": 4, "bp": -5, "bw": 20.0, "rlz": 4, "afa": 2.0, "rbw": 8.0, "fix": 0.25, "norm": 13500, "umw": 98, "q": "TNB03 P0"}
+ ],
+ "rationalisierung": {"A": 1.0, "B": 1.0, "C": 1.0},
+ "umsatz": [129.0, "TNB11 P0"],
+ "rating": ["BBB", "TNB17 P0"],
+ "vorperiode": {"preis": 3000, "werbung": 6.0, "vertrieb": 100, "ci": 2.0, "absatz": 43000, "potentiell": 43000},
+ "markt": {
+  "quelle": "TNB02 P0 (alle Unternehmen identisch)",
+  "firmen": ["U1", "U2", "U3", "U4", "U5", "U6"],
+  "preis": [3000, 3000, 3000, 3000, 3000, 3000],
+  "werbung": [6, 6, 6, 6, 6, 6], "vertrieb": [100, 100, 100, 100, 100, 100],
+  "potentiell": [43000, 43000, 43000, 43000, 43000, 43000],
+  "tatsaechlich": [43000, 43000, 43000, 43000, 43000, 43000],
+  "ungedeckt": [0, 0, 0, 0, 0, 0]
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "hinweis": "Wirtschaftsnachrichten je Periode (Werte, die in dieser Periode gelten), Entscheidungen und Ist-Werte. Zinsen ohne Ratingeffekt; der Ratingeffekt kommt aus dem Rating der Vorperiode (Handbuch S. 32).",
+ "1": {
+  "nachrichten": {
+   "quelle": "Wirtschaftsnachrichten für Periode 1",
+   "wachstum": [0.0, 0.03, 0.06],
+   "wachstum_text": "zunächst geringe Nachfragesteigerung (keine Zahl genannt)",
+   "gehalt": {"ek": 31000, "vw": 29000, "fe": 31000, "fue": 45000, "vt": 41000},
+   "betriebsstoff": 46,
+   "es_preise": [650, 550, 450, 400],
+   "einstellung": 12500, "entlassung": 10000,
+   "zins": {"kurz": 0.08, "lang": 0.07, "ueberz": 0.13},
+   "zins_wp": 0.02,
+   "ga_max": 5000, "ga_preis": 2500,
+   "ausschreibung_menge": 0,
+   "anlagen_preis": {"A": 20, "B": 25, "C": 30}
+  },
+  "entscheidung": {
+   "quelle": "TNB19 Entscheidungsprotokoll P1",
+   "preis": 3050, "werbung": 6.0, "vertrieb": 100, "ci": 2.0, "tech": 35, "oeko": 2.5, "wa": 1.0, "ga": 0, "aus_preis": 0, "mafo": true,
+   "einkauf": 30000, "fertigung": 40500,
+   "inv": {"A": 0, "B": 0, "C": 0}, "rat": {"A": 0, "B": 0, "C": 0}, "ih": {"A": 1.5, "B": 0, "C": 0}, "desinv": [],
+   "umwelt": 1.5, "po": 0, "pers_fe": 70, "training": 1000, "pnk": 40,
+   "kurz": 27.0, "lang": 0, "wp": 0, "div": 0,
+   "plan_absatz": 41000, "plan_ekr": 16, "plan_ocf": 16
+  },
+  "ist": {
+   "quelle": "Sammelbericht P1",
+   "absatz": 45500, "fertigung": 40500, "kap_anl": 40740, "pers_end_fe": 874, "einsetzbar": 835, "produktivitaet": 50.09,
+   "ausl_anl": 99.41, "ausl_pers": 96.84,
+   "umsatz": 138.78, "k_es": 21.54, "k_bs": 1.86, "k_lohn": 39.60, "k_eek": 2.09, "k_sozial": 0, "k_pnk": 15.84, "k_pens": 1.98,
+   "k_afa_geb": 0.25, "k_afa_anl": 6.75, "k_afa_umw": 0.30, "k_fix": 3.25, "k_ih": 7.00, "k_po": 0, "k_umw": 1.11, "k_nach": 1.40,
+   "k_lager": 0.26, "k_werb": 8.10, "k_fue": 3.50, "k_transp": 1.14, "k_schicht": 0,
+   "hk_stk": 2089.64, "bestv": -10.23, "be": 12.58, "zinsen": 1.89, "gvst": 10.69, "steuern": 4.81, "pue": 5.88,
+   "kasse": 27.83, "ueberz": 0, "ford": 27.76, "es_wert": 2.87, "fe_wert": 0, "maschinen": 14.05, "ek": 37.16, "bilanzsumme": 80.01,
+   "ez_sum": 163.82, "az_sum": 136.84, "az_pers": 57.52, "az_mat": 18.36, "ocf": 28.48, "ekr": 18.80,
+   "pers_ek": 20, "pers_vw": 214, "fluk_fe": 48, "fehl": 39, "umw_ind": 94.45, "pq": 86.33
+  }
+ },
+ "2": {
+  "nachrichten": {
+   "quelle": "Wirtschaftsnachrichten für Periode 2",
+   "wachstum": [0.06, 0.08, 0.10],
+   "wachstum_text": "Gesamtmarkt COPY Classic +6 bis 10 % bei normalem Anstieg der Preise",
+   "gehalt": {"ek": 31000, "vw": 29000, "fe": 31000, "fue": 45000, "vt": 41000},
+   "gehalt_text": "Löhne und Gehälter stagnieren → Gehälter wie P1",
+   "betriebsstoff": 46,
+   "betriebsstoff_text": "nicht erwähnt → Wert aus P1 (Lebenshaltungskosten +2 % könnten ihn leicht erhöhen)",
+   "es_preise": [670, 567, 464, 412],
+   "einstellung": 14000, "entlassung": 10000,
+   "zins": {"kurz": 0.075, "lang": 0.065, "ueberz": 0.125},
+   "zins_text": "Zinsen generell −0,5 %-Punkte gegenüber P1 (8 % / 7 % / 13 %)",
+   "zins_wp": 0.015,
+   "zins_wp_text": "nicht genannt; P1 hieß es 2–5 %, abzüglich 0,5 %-Punkte → vorsichtig 1,5 % angesetzt",
+   "ga_max": 8000, "ga_preis": 2450,
+   "ausschreibung_menge": 3000,
+   "ausschreibung_text": "Ministerium, 3.000 Stück, Zuschlag an den niedrigsten Preis, Lieferung und Zahlung in Periode 3",
+   "anlagen_preis": {"A": 20, "B": 25, "C": 22.5},
+   "anlagen_text": "Sonderangebot: Anlage C nur 22,5 MEUR, nur in Periode 2",
+   "konj_text": "Sozialprodukt +2 %, Investitionen +1 %, Lebenshaltung +2 %, Löhne stagnieren, Einstellungskosten 14.000 EUR"
+  },
+  "entscheidung": {
+   "quelle": "Vorbelegung aus dem TOPSIM-Formular P2 (Screenshots)",
+   "preis": 3050, "werbung": 6.0, "vertrieb": 100, "ci": 2.0, "tech": 35, "oeko": 2.5, "wa": 1.0, "ga": 0, "aus_preis": 0, "mafo": true,
+   "einkauf": 30000, "fertigung": 40500,
+   "inv": {"A": 0, "B": 0, "C": 0}, "rat": {"A": 0, "B": 0, "C": 0}, "ih": {"A": 1.5, "B": 0, "C": 0}, "desinv": [],
+   "umwelt": 1.5, "po": 0, "pers_fe": 50, "training": 1000, "pnk": 40,
+   "kurz": 0, "lang": 0, "wp": 0, "div": 0,
+   "plan_absatz": 41000, "plan_ekr": 16, "plan_ocf": 16
+  }
+ }
+}
