@@ -310,6 +310,9 @@ export function rechne(stand, N, F, A, opt = {}) {
     n: nachl > 0 ? `Mehrkosten gegenüber rechtzeitiger Bestellung: ca. ${fm(nachl * (nachlP - N.es_preise[(() => { let j = 0; st.forEach((s, i) => { if (ek + nachl >= s) j = i; }); return j; })()]) / 1e6)}.` : '' });
   const esMenge = esAnf + ek + nachl, esWertGes = esAnfW + esZug + nachlW;
   const esAvg = esMenge === 0 ? 0 : esWertGes * 1e6 / esMenge;
+  def('es_anf_wert', 'Einsatzstoffe Lager Anfang (Wert)', 'MEUR', esAnfW, { s: 'ist', q: Q(L.es_wert), f: `${fz(esAnf)} × ${fz(esAnf ? esAnfW * 1e6 / esAnf : 0, 2)} €` });
+  def('es_avg', 'Ø-Wert je Einheit Einsatzstoffe', 'EUR', esAvg, { d: ['es_anf_wert', 'es_zugang', 'es_nachl_wert'], q: 'Handbuch S. 18: Mischkalkulation aus Anfangsbestand und Zugängen',
+    f: `(${fz(esAnfW, 2)} + ${fz(esZug, 2)} + ${fz(nachlW, 2)}) MEUR / (${fz(esAnf)} + ${fz(ek)} + ${fz(nachl)}) Einheiten` });
   const kEs = def('k_es', 'Verbrauch Einsatzstoffe', 'MEUR', bedarf * esAvg / 1e6, { s: 'kalib', d: ['es_bedarf', 'es_anf', 'es_zugang', 'es_nachl_wert'], q: 'Handbuch S. 18: Bewertung zum Durchschnittspreis (Mischkalkulation)',
     f: `${fz(bedarf)} × ${fz(esAvg, 2)} € (Ø aus (${fz(esAnfW, 2)} + ${fz(esZug, 2)} + ${fz(nachlW, 2)}) MEUR / ${fz(esMenge)})` });
   const esEnd = def('es_end', 'Einsatzstoffe Lager Ende', 'Einheiten', esMenge - bedarf, { s: 'kalib', d: ['es_anf', 'F_einkauf', 'es_nachl', 'es_bedarf'], f: `${fz(esAnf)} + ${fz(ek)} + ${fz(nachl)} − ${fz(bedarf)}` });
@@ -374,6 +377,8 @@ export function rechne(stand, N, F, A, opt = {}) {
   const kNach = def('k_nach', 'Nacharbeit/Ausschuss', 'MEUR', fertIst * n(A.nacharbeit) / 1e6, { s: 'kalib', d: ['fert', 'A_nacharbeit'], f: `${fz(fertIst)} × ${fz(n(A.nacharbeit), 2)} €`,
     n: 'Steigt mit Technologie, Ökologie, Wertanalyse und Überauslastung; sinkt mit PNK und Motivation (Handbuch S. 24).' });
   const lkEs = esEnd * r('lager_es') / 1e6, lkFe = feEnd * r('lager_fe') / 1e6;
+  def('lk_es', 'Lagerkosten Einsatzstoffe', 'MEUR', lkEs, { s: 'kalib', d: ['es_end'], q: R.lager_es[1], f: `${fz(esEnd)} × 50 €` });
+  def('lk_fe', 'Lagerkosten Fertigprodukte', 'MEUR', lkFe, { d: ['fe_lager_end'], q: R.lager_fe[1], f: `${fz(feEnd)} × 100 €` });
   def('k_lager', 'Lagerkosten', 'MEUR', lkEs + lkFe, { s: 'kalib', d: ['es_end', 'fe_lager_end'], q: 'Handbuch S. 17 (auf den Endbestand; Probe P1: 5.294 × 50 € = 0,26)',
     f: `${fz(esEnd)} × 50 € + ${fz(feEnd)} × 100 €` });
   const kWerb = def('k_werb', 'Werbung/Marktforschung/CI', 'MEUR', n(F.werbung) + n(F.ci) + (F.mafo ? r('mafo') : 0), { d: ['F_werbung', 'F_ci', 'F_mafo'], f: `${fz(n(F.werbung), 2)} + ${fz(n(F.ci), 2)} + ${F.mafo ? '0,10' : '0'}` });
@@ -394,6 +399,10 @@ export function rechne(stand, N, F, A, opt = {}) {
       f: `${fz(kGes, 2)} − F&E ${fz(kostFue, 2)} − Vertrieb ${fz(kostVt, 2)} − Verwaltung ${fz(kostVw, 2)} − Werbung ${fz(n(F.werbung), 2)} − F&E-Einzel ${fz(V('k_fue'), 2)} − Transport ${fz(kTr, 2)}`, n: 'Probe P1: 115,96 − 31,33 = 84,63 = TNB09.' });
   def('hk_stk', 'Herstellkosten je Stück', 'EUR', fertIst === 0 ? 0 : hk * 1e6 / fertIst, { d: ['hk', 'fert'], f: `${fz(hk, 2)} MEUR / ${fz(fertIst)}` });
   const feAnfW = W(L.fe_wert), feAvg = (feAnf + fertIst) === 0 ? 0 : (feAnfW + hk) * 1e6 / (feAnf + fertIst);
+  def('fe_anf_wert', 'Fertigprodukte Lager Anfang (Wert)', 'MEUR', feAnfW, { s: 'ist', q: Q(L.fe_wert) });
+  def('fe_avg', 'Ø-Wert je Fertiggerät', 'EUR', feAvg, { d: ['fe_anf_wert', 'hk', 'fe_lager_anf', 'fert'], q: 'Handbuch S. 18: Mischkalkulation (Probe P1: (10,23 + 84,63) / 45.500 = 2.084,94 €)',
+    f: `(${fz(feAnfW, 2)} + ${fz(hk, 2)}) MEUR / (${fz(feAnf)} + ${fz(fertIst)}) Stück` });
+  def('fe_abg_wert', 'Abgang Fertigprodukte (Herstellkosten des Umsatzes)', 'MEUR', feAbg * feAvg / 1e6, { d: ['fe_avg', 'absatz', 'ga_lief'], f: `${fz(feAbg)} × ${fz(feAvg, 2)} €` });
   const feEndW = def('fe_end_wert', 'Fertigprodukte Lager Ende (Wert)', 'MEUR', feEnd * feAvg / 1e6, { d: ['fe_lager_end', 'hk'], q: 'Handbuch S. 18: Mischkalkulation', f: `${fz(feEnd)} × ${fz(feAvg, 2)} €` });
   const bestv = def('bestv', 'Bestandsveränderung Fertigprodukte', 'MEUR', feEndW - feAnfW, { d: ['fe_end_wert'], f: `${fz(feEndW, 2)} − ${fz(feAnfW, 2)} (Anfang)` });
   def('sk_stk', 'Selbstkosten je verkauftem Stück', 'EUR', feAbg === 0 ? 0 : (kGes - bestv) * 1e6 / feAbg, { d: ['g_mat', 'g_pers', 'g_afa', 'g_sonst', 'bestv'], f: `(${fz(kGes, 2)} − ${fz(bestv, 2)}) MEUR / ${fz(feAbg)}` });

@@ -190,11 +190,11 @@ function hinweise() {
 // =============================================================================================
 // Reiter
 // =============================================================================================
-const TABS = [['guv', 'GuV'], ['liq', 'Liquidität'], ['bilanz', 'Bilanz'], ['kosten', 'Kosten'], ['kap', 'Kapazität & Personal'], ['nachfrage', 'Nachfrage'],
+const TABS = [['guv', 'GuV'], ['liq', 'Liquidität'], ['bilanz', 'Bilanz'], ['kosten', 'Kosten'], ['lager', 'Lager'], ['kap', 'Kapazität & Personal'], ['nachfrage', 'Nachfrage'],
   ['wirkung', 'Wirkung je Entscheidung'], ['plan', 'Planwerte'], ['aus', 'Ausschreibung P3'], ['backtest', 'Backtest P1'], ['news', 'Wirtschaftsnachrichten']];
 function tabs() {
   $('tabs').innerHTML = TABS.map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? 'akt' : ''}">${l}</button>`).join('');
-  $('tabinhalt').innerHTML = ({ guv, liq, bilanz, kosten, kap, nachfrage: nachfrageTab, wirkung, plan, aus, backtest, news })[tab]();
+  $('tabinhalt').innerHTML = ({ guv, liq, bilanz, kosten, lager, kap, nachfrage: nachfrageTab, wirkung, plan, aus, backtest, news })[tab]();
 }
 $('tabs').addEventListener('click', ev => { if (ev.target.dataset.tab) { tab = ev.target.dataset.tab; tabs(); } });
 
@@ -244,6 +244,38 @@ function kosten() {
     'Je Stück', ['hk', 'Herstellkosten gesamt'], ['hk_stk'], ['sk_stk'],
   ], { vp: vp1 });
 }
+function lager() {
+  const v = res.v, L = stand.lager;
+  const z = (l, m, w, k, cls = '') => { const e = res.E[k];
+    return `<tr class="klick ${cls}" data-rw="${k}"><td>${e ? dotE(e) : ''}${l}</td><td>${fz(m)}</td><td>${m ? fz(w * 1e6 / m, 2) + ' €' : '–'}</td><td>${fz(w, 2)}</td></tr>`; };
+  const kopf = '<table><tr><th>Position</th><th>Menge</th><th>€ je Stück</th><th>MEUR</th></tr>';
+  let h = `<p class="klein">Aufbau wie TNB05 (Basis-Szenario). Jede Zeile anklicken für den Rechenweg.</p><div class="zwei"><div><h2>Einsatzstoffe/Teile</h2>${kopf}
+    ${z('Lageranfangsbestand', v('es_anf'), v('es_anf_wert'), 'es_anf_wert')}
+    ${z('+ Zugang vom Lieferanten', +F.einkauf, v('es_zugang'), 'es_zugang')}
+    ${z('+ Nachlieferung (Expresszuschlag 20 %)', v('es_nachl'), v('es_nachl_wert'), 'es_nachl_wert')}
+    ${z('− Abgang an Fertigung', v('es_bedarf'), v('k_es'), 'k_es')}
+    ${z('= Lagerendbestand', v('es_end'), v('es_end_wert'), 'es_end_wert', 'summe')}</table>
+    <p class="klein">Bewertung mit dem Durchschnittswert ${fz(v('es_avg'), 2)} €/Einheit. Bedarf = Fertigung ${fz(v('fert'))} / Wertanalyseindex ${fz(+A.wa_index, 3)}.</p></div>
+    <div><h2>Fertigprodukte Copy Classic</h2>${kopf}
+    ${z('Lageranfangsbestand', v('fe_lager_anf'), v('fe_anf_wert'), 'fe_anf_wert')}
+    ${z('+ Zugang von Fertigung', v('fert'), v('hk'), 'hk')}
+    ${z('− Abgang Markt 1', v('absatz'), v('absatz') * v('fe_avg') / 1e6, 'absatz')}
+    ${z('− Abgang Großabnehmer', v('ga_lief'), v('ga_lief') * v('fe_avg') / 1e6, 'ga_lief')}
+    ${z('= Lagerendbestand', v('fe_lager_end'), v('fe_end_wert'), 'fe_end_wert', 'summe')}</table>
+    <p class="klein">Bewertung mit dem Durchschnittswert ${fz(v('fe_avg'), 2)} €/Stück. Endbestand in den Szenarien: pess. ${fz(sz.pess.v('fe_lager_end'))} · Basis ${fz(v('fe_lager_end'))} · opt. ${fz(sz.opt.v('fe_lager_end'))} Stück.</p></div></div>`;
+  h += `<h2 style="margin-top:12px">Lagerkosten und Bestandswirkung</h2>` + tabelle([['lk_es'], ['lk_fe'], ['k_lager', 'Lagerkosten gesamt', 'summe'], ['bestv'], ['fe_abg_wert']], { vp: { lk_es: 0.26, lk_fe: 0, k_lager: IST1.k_lager, bestv: IST1.bestv, fe_abg_wert: 94.86 } });
+  // Bestellhilfe
+  const st = [0, 30000, 50000, 70000], bed = v('es_bedarf'), anf = v('es_anf'), noetig = Math.max(0, bed - anf);
+  const opts = [...new Set([+F.einkauf, Math.ceil(noetig / 100) * 100, 30000, 50000, 70000])].filter(x => x >= 0).sort((a, b) => a - b);
+  h += `<h2 style="margin-top:12px">Bestellhilfe Einsatzstoffe</h2>
+    <p>Bedarf P2 ${fz(bed)} Einheiten, Lagerbestand ${fz(anf)} → mindestens <b>${fz(noetig)}</b> bestellen, sonst Nachlieferung zu ${fz(N.es_preise[0] * 1.2)} €. Preisstaffel P2: ${N.es_preise.map((p, i) => `${i ? 'ab ' + fz(st[i]) : 'bis 29.999'}: ${fz(p)} €`).join(' · ')}.</p>
+    <table><tr><th>Bestellmenge</th><th>Preis/Einheit</th><th>Nachlieferung</th><th>Endbestand</th><th>Lagerkosten</th><th>Δ PÜ P2</th><th>Δ Kasse P2</th></tr>
+    ${opts.map(m => { const r2 = M.rechne(stand, N, { ...F, einkauf: m }, A);
+      return `<tr${m === +F.einkauf ? ' style="font-weight:600;background:#fff6e0"' : ''}><td>${fz(m)}</td><td>${fz(r2.v('es_preis'))} €</td><td>${fz(r2.v('es_nachl'))}</td><td>${fz(r2.v('es_end'))}</td><td>${fz(r2.v('lk_es'), 2)}</td><td>${sgn(r2.v('pue') - v('pue'))}</td><td>${sgn(r2.v('kasse') - v('kasse'))}</td></tr>`; }).join('')}</table>
+    <p class="klein">Ein höherer Endbestand belastet P2 (Lagerkosten 50 €/Einheit, Kasse), senkt aber den Einkauf in P3. Die Preise für P3 sind noch nicht bekannt (P1→P2: +3 %).</p>`;
+  return h;
+}
+
 function kap() {
   const v = res.v, max = Math.max(sz.opt.v('nachfrage'), v('kap_anl_ue'), v('kap_pers_ue'), +F.fertigung) * 1.05;
   const bar = (l, a, b, farbe, txt, k) => `<div class="zeile"${k ? ` data-rw="${k}" style="cursor:pointer"` : ''}><span>${l}</span><div class="spur"><div class="b" style="left:${a / max * 100}%;width:${Math.max(0.4, (b - a) / max * 100)}%;background:${farbe}"></div></div><span class="wert">${txt}</span></div>`;
