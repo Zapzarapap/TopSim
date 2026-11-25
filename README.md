@@ -1,6 +1,6 @@
 # TOPSIM Spielwiese
 
-Planungstool für TOPSIM „Mastering Business Operations“ (Unternehmen 1, Copy Classic, Markt 1). Aktuell: **Planung Periode 2** auf Basis des Sammelberichts Periode 1.
+Planungstool für TOPSIM „Mastering Business Operations“ (Unternehmen 1, Copy Classic, Markt 1). Oben im Kopf lässt sich die Periode umschalten: gelaufene Perioden als Rückblick (Formular = echte Entscheidungen, Vergleich mit dem Ist), die neueste als Planung. Direktlink: `#p1`, `#p2`.
 
 Läuft über GitHub Pages ohne Build-Schritt. Lokal nur über einen Webserver (`python3 -m http.server`), nicht per Doppelklick.
 
@@ -26,5 +26,5 @@ Läuft über GitHub Pages ohne Build-Schritt. Lokal nur über einen Webserver (`
 
 1. `daten/stand_p{n}.json` aus dem Sammelbericht anlegen (Aufbau wie `stand_p1.json`).
 2. In `daten/perioden.json` bei Periode n die Ist-Werte und bei n+1 Wirtschaftsnachrichten und die Vorbelegung des Formulars ergänzen.
-3. In `app.js` `PLAN` hochzählen und die Ladepfade anpassen, Backtest auf Periode n umstellen.
+3. Die neueste Periode in `perioden.json` wird automatisch zur Planperiode; Backtest in `app.js` auf Periode n umstellen.
 4. `node tools/pruefen.mjs`: Bilanzprobe muss 0 sein, Backtest-Abweichungen klären.

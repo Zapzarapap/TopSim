@@ -1,12 +1,24 @@
 import * as M from './modell.js';
 const { fz } = M;
 
-const PLAN = 2;                       // Planperiode
-const SPEICHER = 'topsim-spielwiese-p' + PLAN;
 const $ = id => document.getElementById(id);
 const lade = f => fetch('daten/' + f).then(r => r.json());
-
-const [stand, stand0, perioden] = await Promise.all([lade('stand_p1.json'), lade('stand_p0.json'), lade('perioden.json')]);
+const perioden = await lade('perioden.json');
+const PERIODEN = Object.keys(perioden).filter(k => /^\d+$/.test(k)).map(Number).sort((a, b) => a - b);
+const NEUESTE = PERIODEN[PERIODEN.length - 1];
+const PLAN = PERIODEN.includes(+location.hash.replace('#p', '')) ? +location.hash.replace('#p', '') : NEUESTE;   // angezeigte Periode
+const SPEICHER = 'topsim-spielwiese-p' + PLAN;
+const [stand, stand0] = await Promise.all([lade(`stand_p${PLAN - 1}.json`), lade('stand_p0.json')]);
+const IST = perioden[PLAN].ist || null;                 // Ist-Werte, falls die Periode schon gelaufen ist
+const RUECK = !!IST;
+const VGL = IST || perioden[PLAN - 1]?.ist || null;     // Vergleichsspalte
+const VGL_L = IST ? `Ist P${PLAN}` : `Ist P${PLAN - 1}`;
+window.addEventListener('hashchange', () => location.reload());
+document.querySelector('header h1').textContent = `TOPSIM Spielwiese · ${RUECK ? 'Rückblick' : 'Planung'} Periode ${PLAN}`;
+document.querySelector('header .sub').textContent = `Unternehmen 1 · Copy Classic · Ausgangslage: ${stand.periode === 0 ? 'Sammelbericht Periode 0' : 'Sammelbericht Periode ' + stand.periode}`;
+const sw = document.createElement('div'); sw.className = 'umschalter';
+sw.innerHTML = PERIODEN.map(p => `<a href="#p${p}" class="${p === PLAN ? 'akt' : ''}">P${p}${perioden[p].ist ? ' (Ist)' : ' (Plan)'}</a>`).join('');
+document.querySelector('header').insertBefore(sw, document.querySelector('header .legende'));
 const N = perioden[PLAN].nachrichten;
 const F0 = structuredClone(perioden[PLAN].entscheidung);
 const A0 = M.standardAnnahmen(stand, N);
@@ -43,7 +55,7 @@ const FELDER = {
     ['Vertrieb', [['vertrieb', 'Vertrieb (Anz. Personen)', 'Endbestand', 1, 'vertrieb']]],
     ['Corporate Identity', [['ci', 'Corporate Identity', 'MEUR', 0.5, 'ci']]],
     ['Produktentwicklung', [['tech', 'Mitarbeiterendbestand Technologie', 'Personen', 1], ['oeko', 'Ökologie', 'MEUR', 0.25], ['wa', 'Wertanalyse', 'MEUR', 0.25]]],
-    ['Sonstige Märkte – Copy Classic', [['ga', 'Großabnehmer', `Stück (max. ${fz(N.ga_max)} à ${fz(N.ga_preis)} €)`, 500], ['aus_preis', 'Ausschreibung (Gebot)', 'EUR/Stück, Lieferung P3', 10]]],
+    ['Sonstige Märkte – Copy Classic', [['ga', 'Großabnehmer', `Stück (max. ${fz(N.ga_max)} à ${fz(N.ga_preis)} €)`, 500], ['aus_preis', 'Ausschreibung (Gebot)', `EUR/Stück, Lieferung P${PLAN + 1}`, 10]]],
     ['Marktforschung', [['mafo', 'Marktforschungsbericht', '0,1 MEUR', 'check']]],
   ]],
   fertigung: ['Einkauf und Fertigung', [
@@ -67,7 +79,7 @@ function feldHtml([k, l, u, step, vpk]) {
   const anders = +F[k] !== +F0[k];
   return `<div class="feld"><label for="f_${k}">${l}<br><span class="einh">${u}</span></label>
     <input type="number" id="f_${k}" data-f="${k}" step="${step}" value="${F[k]}" class="${anders ? 'geaendert' : ''}" title="TOPSIM-Vorbelegung: ${fz(F0[k], 2)}">
-    ${vpk ? `<div class="vp">P1: ${fz(VP[vpk], 2)}${stand.markt[vpk] ? ` · Ø Konkurrenz P1: ${fz(avgK(vpk), 2)}` : ''}</div>` : ''}</div>`;
+    ${vpk ? `<div class="vp">P${stand.periode}: ${fz(VP[vpk], 2)}${stand.markt[vpk] ? ` · Ø Konkurrenz P${stand.periode}: ${fz(avgK(vpk), 2)}` : ''}</div>` : ''}</div>`;
 }
 const avgK = k => { const a = stand.markt[k].slice(1); return a.reduce((s, x) => s + x, 0) / a.length; };
 
@@ -81,7 +93,7 @@ function formular() {
       [['inv', 'Investition (Anz. neue Anlagen)', 1], ['rat', 'Budget Rationalisierung (MEUR)', 0.5], ['ih', 'Instandhaltung pro Anlage (MEUR)', 0.1]].forEach(([g, l, st]) => {
         h += `<span>${l}</span>` + ['A', 'B', 'C'].map(t => `<input type="number" step="${st}" min="0" data-g="${g}" data-t="${t}" value="${F[g][t]}">`).join('');
       });
-      h += `</div><div class="klein" style="margin-top:4px">Preise P2: A ${fz(N.anlagen_preis.A)} · B ${fz(N.anlagen_preis.B)} · <b>C ${fz(N.anlagen_preis.C, 1)} MEUR (Sonderangebot nur P2)</b></div>`;
+      h += `</div><div class="klein" style="margin-top:4px">Preise P${PLAN}: A ${fz(N.anlagen_preis.A)} · B ${fz(N.anlagen_preis.B)} · <b>C ${fz(N.anlagen_preis.C, 1)} MEUR${N.anlagen_text ? ' (Sonderangebot)' : ''}</b></div>`;
     } else if (felder === 'desinv') {
       h += `<div class="typen" style="grid-template-columns:1fr 60px 90px 60px"><span class="kopf" style="text-align:left">Anlage</span><span class="kopf">RLZ</span><span class="kopf">Restbuchwert</span><span class="kopf">Verkauf?</span>`;
       stand.anlagen.forEach(a => { const id = a.typ + a.nr;
@@ -146,7 +158,7 @@ function rechnen() {
 
 function kacheln() {
   const K = [
-    ['absatz', 'Absatz Markt 1'], ['umsatz', 'Umsatz'], ['be', 'Betriebsergebnis'], ['pue', 'Periodenüberschuss'], ['kasse', 'Kasse Ende P2'],
+    ['absatz', 'Absatz Markt 1'], ['umsatz', 'Umsatz'], ['be', 'Betriebsergebnis'], ['pue', 'Periodenüberschuss'], ['kasse', 'Kasse Ende P' + PLAN],
     ['ekr', 'EK-Rendite'], ['ocf', 'Operativer Cashflow'], ['ausl_anl', 'Auslastung Anlagen'], ['ausl_pers', 'Auslastung Personal'], ['pq', 'Planungsqualität'],
   ];
   $('kacheln').innerHTML = K.map(([k, l]) => {
@@ -156,7 +168,8 @@ function kacheln() {
     if (k === 'ausl_pers' || k === 'ausl_anl') cls = e.v > 100.0001 ? 'warn' : e.v >= 95 ? 'ok' : 'mittel';
     if (k === 'kasse') cls = res.v('ueberz') > 0 ? 'warn' : '';
     if (k === 'pue') cls = e.v < 0 ? 'warn' : '';
-    return `<div class="kachel ${cls}" data-rw="${k}"><div class="l">${dotE(e)}${l}</div><div class="w">${fv(e)}</div><div class="s">${spanne}</div></div>`;
+    const ist = IST && vgl[k] != null ? `<div class="s" style="color:var(--text)"><b>Ist P${PLAN}: ${fv(e, vgl[k])}</b></div>` : '';
+    return `<div class="kachel ${cls}" data-rw="${k}"><div class="l">${dotE(e)}${l}</div><div class="w">${fv(e)}</div><div class="s">${spanne}</div>${ist}</div>`;
   }).join('');
 }
 
@@ -174,7 +187,7 @@ function hinweise() {
   if (naechst && v('es_bedarf') + 3000 > naechst) add('info', `Einkauf: Ab ${fz(naechst)} Einheiten gilt die nächste Preisstaffel. Der Bedarf liegt bei ${fz(v('es_bedarf'))}; Restbestand fließt in die nächste Periode.`);
   if (v('es_end') > 15000) add('gelb', `Hoher Endbestand Einsatzstoffe: ${fz(v('es_end'))} Einheiten (${fz(v('es_end') * 50 / 1e6, 2)} MEUR Lagerkosten, Kapitalbindung ${M.fm(v('es_end_wert'))}).`);
   if (v('ausl_pers') < 92) add('gelb', `Personalauslastung nur ${fz(v('ausl_pers'), 1)} % (Handbuch: ca. 98 % gilt als motivationsförderlich).`);
-  if (v('kasse') > 10 && v('ueberz') === 0) add('info', `Kasse Ende P2 ${M.fm(v('kasse'))}: Liquidität wird nicht gebraucht. Optionen: Wertpapiere (Zins ${fz(N.zins_wp * 100, 1)} %, Schätzung), Dividende (max. ${M.fm(stand.bilanz.gewinnvortrag[0])}), Investitionen.`);
+  if (v('kasse') > 10 && v('ueberz') === 0) add('info', `Kasse Ende P${PLAN} ${M.fm(v('kasse'))}: Liquidität wird nicht gebraucht. Optionen: Wertpapiere (Zins ${fz(N.zins_wp * 100, 1)} %, Schätzung), Dividende (max. ${M.fm(stand.bilanz.gewinnvortrag[0])}), Investitionen.`);
   if (+F.kurz > 0 && sz.pess.v('kasse') - +F.kurz > 1) add('info', `Der kurzfristige Kredit (${M.fm(+F.kurz)}) wäre laut Rechnung auch im pessimistischen Fall nicht nötig und kostet ${M.fm(res.v('zinsen'))} Zinsen.`);
   if (v('umw_ind') < 100) add('info', `Umweltindikator ${fz(v('umw_ind'), 2)} → Abgabe ${M.fm(v('k_umw'))}. Neue Anlagen (B 105, C 110) oder Verkauf der alten A1 (83) heben den Anlagenschnitt.`);
   const pa = Math.abs((v('absatz') + v('ga_lief')) / (+F.plan_absatz || 1) - 1), pe = Math.abs(v('ekr') - +F.plan_ekr), po = Math.abs(v('ocf') - +F.plan_ocf);
@@ -182,6 +195,7 @@ function hinweise() {
   if (+F.aus_preis > 0) add('info', `Ausschreibung: Gebot ${fz(+F.aus_preis)} € wirkt erst in P3 (Lieferung 3.000 Stück und Zahlung). Siehe Reiter „Ausschreibung P3“.`);
   if (+F.tech < 35) add('gelb', 'Weniger F&E-Personal: Technologieindex kann sinken. Wir liegen schon jetzt mit 102,45 hinter U3–U6 (102,80). Wirkung auf die Nachfrage ist im Modell nicht enthalten.');
   if (+F.preis > stand.vorperiode.preis) add('info', `Preiserhöhung um ${fz(+F.preis - stand.vorperiode.preis)} €: Laut Handbuch bevorzugen Kunden konstante Preise (Kundenzufriedenheit). Das Modell rechnet nur die Preiselastizität.`);
+  if (RUECK) H.unshift(['info', `<b>Rückblick:</b> Periode ${PLAN} ist schon gelaufen. Das Formular enthält eure tatsächlichen Entscheidungen, die Kacheln zeigen zusätzlich das Ist, die Tabellen haben eine Spalte „${VGL_L}“. Eingaben hier ändern nichts an P${NEUESTE}.`]);
   if (!H.length) add('gruen', 'Keine Auffälligkeiten.');
   const ic = { rot: '⛔', gelb: '⚠️', info: 'ℹ️', gruen: '✓' };
   $('hinweise').innerHTML = H.map(([c, t]) => `<li class="${c}"><span>${ic[c]}</span><span>${t}</span></li>`).join('');
@@ -191,7 +205,7 @@ function hinweise() {
 // Reiter
 // =============================================================================================
 const TABS = [['guv', 'GuV'], ['liq', 'Liquidität'], ['bilanz', 'Bilanz'], ['kosten', 'Kosten'], ['lager', 'Lager'], ['kap', 'Kapazität & Personal'], ['nachfrage', 'Nachfrage'],
-  ['wirkung', 'Wirkung je Entscheidung'], ['plan', 'Planwerte'], ['aus', 'Ausschreibung P3'], ['backtest', 'Backtest P1'], ['news', 'Wirtschaftsnachrichten']];
+  ['wirkung', 'Wirkung je Entscheidung'], ['plan', 'Planwerte'], ['aus', `Ausschreibung P${PLAN + 1}`], ['backtest', 'Backtest P1'], ['news', 'Wirtschaftsnachrichten']];
 function tabs() {
   $('tabs').innerHTML = TABS.map(([k, l]) => `<button data-tab="${k}" class="${k === tab ? 'akt' : ''}">${l}</button>`).join('');
   $('tabinhalt').innerHTML = ({ guv, liq, bilanz, kosten, lager, kap, nachfrage: nachfrageTab, wirkung, plan, aus, backtest, news })[tab]();
@@ -201,7 +215,7 @@ $('tabs').addEventListener('click', ev => { if (ev.target.dataset.tab) { tab = e
 // Tabelle mit klickbaren Zeilen; Spalten pess / Basis / opt
 function tabelle(zeilen, opt = {}) {
   const sc = opt.szen !== false;
-  let h = `<table><tr><th>${opt.titel || 'Position'}</th>${sc ? '<th>pessimistisch</th><th>Basis</th><th>optimistisch</th>' : '<th>Wert</th>'}${opt.vp ? '<th>Ist P1</th>' : ''}</tr>`;
+  let h = `<table><tr><th>${opt.titel || 'Position'}</th>${sc ? '<th>pessimistisch</th><th>Basis</th><th>optimistisch</th>' : '<th>Wert</th>'}${opt.vp ? `<th>${VGL_L}</th>` : ''}</tr>`;
   zeilen.forEach(z => {
     if (typeof z === 'string') { h += `<tr class="zwischen"><td colspan="${(sc ? 4 : 2) + (opt.vp ? 1 : 0)}">${z}</td></tr>`; return; }
     const [k, l, cls, vz] = z, e = res.E[k]; if (!e) return;
@@ -211,11 +225,17 @@ function tabelle(zeilen, opt = {}) {
   return h + '</table>';
 }
 const IST1 = perioden[1].ist;
-const vp1 = { umsatz: IST1.umsatz, bestv: IST1.bestv, g_mat: IST1.k_es + IST1.k_bs, g_pers: 59.50, g_afa: 7.30, g_sonst: 25.76, be: IST1.be, zinsen: IST1.zinsen, gvst: IST1.gvst, steuern: IST1.steuern, pue: IST1.pue, ekr: IST1.ekr, ocf: IST1.ocf,
-  kasse: IST1.kasse, ez_sum: IST1.ez_sum, az_sum: IST1.az_sum, az_pers: IST1.az_pers, az_mat: IST1.az_mat, bi_ford: IST1.ford, es_end_wert: IST1.es_wert, fe_end_wert: 0, bi_masch: IST1.maschinen, bi_ek: IST1.ek, bi_aktiva: IST1.bilanzsumme, bi_grund: 7.5,
-  absatz: IST1.absatz, umsatz_m1: IST1.umsatz, fert: IST1.fertigung, hk_stk: IST1.hk_stk };
-['k_es', 'k_bs', 'k_lohn', 'k_eek', 'k_pnk', 'k_pens', 'k_afa_geb', 'k_afa_anl', 'k_afa_umw', 'k_fix', 'k_ih', 'k_po', 'k_umw', 'k_nach', 'k_lager', 'k_werb', 'k_fue', 'k_transp', 'k_schicht'].forEach(k => { vp1[k] = IST1[k]; });
-vp1.k_sozial = 0;
+const vgl = {};
+if (VGL) {
+  const I = VGL;
+  Object.assign(vgl, { umsatz: I.umsatz, bestv: I.bestv, g_mat: I.k_es + I.k_bs, g_pers: I.k_lohn + I.k_eek + I.k_sozial + I.k_pnk + I.k_pens, g_afa: I.k_afa_geb + I.k_afa_anl + I.k_afa_umw,
+    g_sonst: I.k_fix + I.k_ih + I.k_po + I.k_umw + I.k_nach + I.k_lager + I.k_werb + I.k_fue + I.k_transp + I.k_schicht, be: I.be, zinsen: I.zinsen, gvst: I.gvst, steuern: I.steuern, pue: I.pue, ekr: I.ekr, ocf: I.ocf,
+    kasse: I.kasse, ueberz: I.ueberz, ez_sum: I.ez_sum, az_sum: I.az_sum, az_pers: I.az_pers, az_mat: I.az_mat, bi_ford: I.ford, es_end_wert: I.es_wert, fe_end_wert: I.fe_wert, bi_masch: I.maschinen, bi_ek: I.ek, bi_aktiva: I.bilanzsumme,
+    absatz: I.absatz, umsatz_m1: I.umsatz, fert: I.fertigung, hk_stk: I.hk_stk, ausl_anl: I.ausl_anl, ausl_pers: I.ausl_pers, pq: I.pq, kap_anl: I.kap_anl, fe_end: I.pers_end_fe, fe_fluk: I.fluk_fe, fe_fehl: I.fehl,
+    fe_einsetzbar: I.einsetzbar, produktivitaet: I.produktivitaet, umw_ind: I.umw_ind, k_sozial: I.k_sozial, lk_es: I.k_lager, k_lager: I.k_lager });
+  ['k_es', 'k_bs', 'k_lohn', 'k_eek', 'k_pnk', 'k_pens', 'k_afa_geb', 'k_afa_anl', 'k_afa_umw', 'k_fix', 'k_ih', 'k_po', 'k_umw', 'k_nach', 'k_lager', 'k_werb', 'k_fue', 'k_transp', 'k_schicht'].forEach(k => { vgl[k] = I[k]; });
+}
+const vp1 = vgl;
 
 function guv() {
   return `<p class="klein">Gesamtkostenverfahren wie TNB11. Jede Zeile anklicken für den Rechenweg. Spalten: Nachfrage-Szenarien (die Kosten ändern sich nur, wenn sich der Absatz ändert).</p>` + tabelle([
@@ -227,18 +247,18 @@ function guv() {
   ], { vp: vp1 });
 }
 function liq() {
-  return `<p class="klein">Liquiditätsrechnung wie TNB12. Der kurzfristige Kredit aus P1 (27 MEUR) wird in P2 automatisch zurückgezahlt.</p>` + tabelle([
+  return `<p class="klein">Liquiditätsrechnung wie TNB12. Der kurzfristige Kredit aus P${stand.periode} (${M.fm(stand.bilanz.kredit_kurz[0])}) wird in P${PLAN} automatisch zurückgezahlt.</p>` + tabelle([
     'Einzahlungen', ['ez_akt'], ['ez_vp'], ['wp_ertrag'], ['ez_desinv'], ['ez_kredit'], ['ueberz'], ['ez_sum', 'Summe Einzahlungen', 'summe'],
     'Auszahlungen', ['az_mat'], ['az_pers'], ['az_sonst'], ['az_tilg'], ['zinsen'], ['az_inv'], ['F_wp', 'Kauf Wertpapiere'], ['az_div'], ['steuern'], ['zins_ue'], ['az_sum', 'Summe Auszahlungen', 'summe'],
     ['kasse', 'Kassenendbestand', 'summe'],
-  ], { vp: vp1 }) + `<p class="klein">Kassenanfangsbestand: ${M.fm(stand.bilanz.kasse[0])} (TNB15 P1).</p>`;
+  ], { vp: vp1 }) + `<p class="klein">Kassenanfangsbestand: ${M.fm(stand.bilanz.kasse[0])} (TNB15 P${stand.periode}).</p>`;
 }
 function bilanz() {
   return `<div class="zwei"><div><h2>Aktiva</h2>${tabelle([['bi_grund'], ['bi_masch'], ['es_end_wert'], ['fe_end_wert'], ['bi_ford'], ['F_wp', 'Wertpapiere'], ['kasse'], ['bi_aktiva', 'Bilanzsumme', 'summe']], { vp: vp1 })}</div>
     <div><h2>Passiva und Kennzahlen</h2>${tabelle([['bi_ek', 'Eigenkapital'], ['bi_fk', 'Fremdkapital inkl. Pensionen'], ['ekq'], ['ocf'], ['bi_diff']])}</div></div>`;
 }
 function kosten() {
-  return `<p class="klein">Kostenarten wie TNB07. Rechte Spalte: Ist P1 zum Vergleich.</p>` + tabelle([
+  return `<p class="klein">Kostenarten wie TNB07. Rechte Spalte: ${VGL_L} zum Vergleich.</p>` + tabelle([
     'Material', ['k_es'], ['k_bs'], 'Personal', ['k_lohn'], ['k_eek'], ['k_sozial'], ['k_pnk'], ['k_pens'], 'Abschreibungen', ['k_afa_geb'], ['k_afa_anl'], ['k_afa_umw'],
     'Sonstige', ['k_fix'], ['k_ih'], ['k_po'], ['k_umw'], ['k_nach'], ['k_lager'], ['k_werb'], ['k_fue'], ['k_transp'], ['k_schicht'],
     'Je Stück', ['hk', 'Herstellkosten gesamt'], ['hk_stk'], ['sk_stk'],
@@ -263,16 +283,16 @@ function lager() {
     ${z('− Abgang Großabnehmer', v('ga_lief'), v('ga_lief') * v('fe_avg') / 1e6, 'ga_lief')}
     ${z('= Lagerendbestand', v('fe_lager_end'), v('fe_end_wert'), 'fe_end_wert', 'summe')}</table>
     <p class="klein">Bewertung mit dem Durchschnittswert ${fz(v('fe_avg'), 2)} €/Stück. Endbestand in den Szenarien: pess. ${fz(sz.pess.v('fe_lager_end'))} · Basis ${fz(v('fe_lager_end'))} · opt. ${fz(sz.opt.v('fe_lager_end'))} Stück.</p></div></div>`;
-  h += `<h2 style="margin-top:12px">Lagerkosten und Bestandswirkung</h2>` + tabelle([['lk_es'], ['lk_fe'], ['k_lager', 'Lagerkosten gesamt', 'summe'], ['bestv'], ['fe_abg_wert']], { vp: { lk_es: 0.26, lk_fe: 0, k_lager: IST1.k_lager, bestv: IST1.bestv, fe_abg_wert: 94.86 } });
+  h += `<h2 style="margin-top:12px">Lagerkosten und Bestandswirkung</h2>` + tabelle([['lk_es'], ['lk_fe'], ['k_lager', 'Lagerkosten gesamt', 'summe'], ['bestv'], ['fe_abg_wert']], { vp: VGL ? vgl : null });
   // Bestellhilfe
   const st = [0, 30000, 50000, 70000], bed = v('es_bedarf'), anf = v('es_anf'), noetig = Math.max(0, bed - anf);
   const opts = [...new Set([+F.einkauf, Math.ceil(noetig / 100) * 100, 30000, 50000, 70000])].filter(x => x >= 0).sort((a, b) => a - b);
   h += `<h2 style="margin-top:12px">Bestellhilfe Einsatzstoffe</h2>
-    <p>Bedarf P2 ${fz(bed)} Einheiten, Lagerbestand ${fz(anf)} → mindestens <b>${fz(noetig)}</b> bestellen, sonst Nachlieferung zu ${fz(N.es_preise[0] * 1.2)} €. Preisstaffel P2: ${N.es_preise.map((p, i) => `${i ? 'ab ' + fz(st[i]) : 'bis 29.999'}: ${fz(p)} €`).join(' · ')}.</p>
-    <table><tr><th>Bestellmenge</th><th>Preis/Einheit</th><th>Nachlieferung</th><th>Endbestand</th><th>Lagerkosten</th><th>Δ PÜ P2</th><th>Δ Kasse P2</th></tr>
+    <p>Bedarf P${PLAN} ${fz(bed)} Einheiten, Lagerbestand ${fz(anf)} → mindestens <b>${fz(noetig)}</b> bestellen, sonst Nachlieferung zu ${fz(N.es_preise[0] * 1.2)} €. Preisstaffel P${PLAN}: ${N.es_preise.map((p, i) => `${i ? 'ab ' + fz(st[i]) : 'bis 29.999'}: ${fz(p)} €`).join(' · ')}.</p>
+    <table><tr><th>Bestellmenge</th><th>Preis/Einheit</th><th>Nachlieferung</th><th>Endbestand</th><th>Lagerkosten</th><th>Δ PÜ P${PLAN}</th><th>Δ Kasse P${PLAN}</th></tr>
     ${opts.map(m => { const r2 = M.rechne(stand, N, { ...F, einkauf: m }, A);
       return `<tr${m === +F.einkauf ? ' style="font-weight:600;background:#fff6e0"' : ''}><td>${fz(m)}</td><td>${fz(r2.v('es_preis'))} €</td><td>${fz(r2.v('es_nachl'))}</td><td>${fz(r2.v('es_end'))}</td><td>${fz(r2.v('lk_es'), 2)}</td><td>${sgn(r2.v('pue') - v('pue'))}</td><td>${sgn(r2.v('kasse') - v('kasse'))}</td></tr>`; }).join('')}</table>
-    <p class="klein">Ein höherer Endbestand belastet P2 (Lagerkosten 50 €/Einheit, Kasse), senkt aber den Einkauf in P3. Die Preise für P3 sind noch nicht bekannt (P1→P2: +3 %).</p>`;
+    <p class="klein">Ein höherer Endbestand belastet P${PLAN} (Lagerkosten 50 €/Einheit, Kasse), senkt aber den Einkauf in P${PLAN + 1}. Die Einkaufspreise der Folgeperiode sind vorher nicht bekannt.</p>`;
   return h;
 }
 
@@ -303,10 +323,12 @@ function kap() {
 
 function nachfrageTab() {
   const ms = res.ms, mk = stand.markt, nb = res.nb;
-  if (!ms) return '<p>Keine Marktdaten.</p>';
-  let h = `<div class="warnbox"><b>Hier ist die größte Unsicherheit.</b> Die Nachfrage hängt davon ab, was die Konkurrenz in P2 macht, und das kann niemand vorhersagen. Das Modell ist eine begründete Schätzung, keine Spielregel.</div>
+  if (!ms) return `<div class="warnbox">Im Marktforschungsbericht P${stand.periode} hatten alle 6 Unternehmen identische Werte. Daraus lässt sich keine Preis- oder Werbewirkung schätzen. Das Modell nutzt hier nur die Handbuchwerte (Werbung +2.000 Stück je MEUR, Vertrieb +2.000 je 10 MA) und eine geschätzte Preiselastizität von −2,5.</div>
+    ${tabelle([['A_wachstum', 'Marktwachstum (Wirtschaftsnachrichten)'], ['A_konk_preis'], ['M_konkpreis'], ['F_preis', 'Unser Preis'], ['nachfrage_modell'], ['nachfrage_pess'], ['nachfrage_opt'], ['absatz'], ['ungedeckt']], { szen: false })}
+    ${IST ? `<p>Tatsächlich: potentieller Absatz ${fz(perioden[PLAN].ist.absatz)} Stück verkauft (siehe Backtest).</p>` : ''}`;
+  let h = `<div class="warnbox"><b>Hier ist die größte Unsicherheit.</b> Die Nachfrage hängt davon ab, was die Konkurrenz in P${PLAN} macht, und das kann niemand vorhersagen. Das Modell ist eine begründete Schätzung, keine Spielregel.</div>
   <h2>1. Wie das Modell entsteht</h2>
-  <p>Der Marktforschungsbericht P1 (TNB02) zeigt für alle 6 Unternehmen Preis, Werbung, Vertrieb und den <i>potentiellen</i> Absatz (Nachfrage ohne Lieferengpässe). Daraus wird per Regression geschätzt, wie stark Preis, Werbung und Vertrieb die Nachfrage verschieben:</p>
+  <p>Der Marktforschungsbericht P${stand.periode} (TNB02) zeigt für alle 6 Unternehmen Preis, Werbung, Vertrieb und den <i>potentiellen</i> Absatz (Nachfrage ohne Lieferengpässe). Daraus wird per Regression geschätzt, wie stark Preis, Werbung und Vertrieb die Nachfrage verschieben:</p>
   <div class="formel">ln(Nachfrage) = ${fz(ms.c, 3)} ${ms.e < 0 ? '−' : '+'} ${fz(Math.abs(ms.e), 2)} × ln(Preis / Ø-Preis) + ${fz(ms.w, 4)} × (Werbung − Ø) + ${fz(ms.v, 5)} × (Vertrieb − Ø)</div>
   <ul>
     <li><b>Preis:</b> 1 % teurer als der Marktdurchschnitt ≈ ${fz(-ms.e, 1)} % weniger Nachfrage. Das ist deutlich stärker als „reaktionsarm“ klingt.</li>
@@ -317,9 +339,9 @@ function nachfrageTab() {
   <table><tr><th>Unternehmen</th><th>Preis</th><th>Werbung</th><th>Vertrieb</th><th>Technologie</th><th>potentieller Absatz</th><th>Modell</th><th>Abweichung</th><th>tatsächlich</th></tr>
   ${mk.firmen.map((u, i) => `<tr${i === 0 ? ' style="font-weight:600"' : ''}><td>${u}</td><td>${fz(mk.preis[i])}</td><td>${fz(mk.werbung[i], 1)}</td><td>${fz(mk.vertrieb[i])}</td><td>${fz(mk.technologie[i], 2)}</td><td>${fz(mk.potentiell[i])}</td><td>${fz(ms.fit[i])}</td><td>${sgn(ms.rest[i] * 100, 1)} %</td><td>${fz(mk.tatsaechlich[i])}</td></tr>`).join('')}
   <tr class="summe"><td>Markt</td><td>${fz(ms.pq)}</td><td>${fz(ms.wq, 2)}</td><td>${fz(ms.vq, 1)}</td><td></td><td>${fz(ms.summe)}</td><td></td><td></td><td>${fz(mk.tatsaechlich.reduce((s, x) => s + x, 0))}</td></tr></table>
-  <p class="klein">U1 hat in P1 ${fz(mk.tatsaechlich[0])} verkauft, obwohl die eigene Nachfrage nur ${fz(mk.potentiell[0])} war: Die ${fz(mk.tatsaechlich[0] - mk.potentiell[0])} Stück kamen von U2/U3, die nicht liefern konnten. Darauf kann man nicht planen (Annahme „Spillover“ = 0).</p>
-  <h2>2. Rechnung für P2</h2>
-  ${tabelle([['A_wachstum', 'Marktwachstum (Wirtschaftsnachrichten 6–10 %)'], ['A_konk_preis', 'Ø-Preis Konkurrenz P2 (Annahme)'], ['M_konkpreis'], ['F_preis', 'Unser Preis'], ['F_werbung', 'Unsere Werbung'], ['A_konk_werbung'], ['F_vertrieb', 'Unser Vertrieb'], ['A_konk_vertrieb'], ['A_eigenfaktor'], ['nachfrage_modell'], ['nachfrage_pess'], ['nachfrage_opt'], ['absatz'], ['ungedeckt']], { szen: false })}
+  <p class="klein">U1 hat in P${stand.periode} ${fz(mk.tatsaechlich[0])} verkauft, obwohl die eigene Nachfrage nur ${fz(mk.potentiell[0])} war: Die ${fz(mk.tatsaechlich[0] - mk.potentiell[0])} Stück kamen von U2/U3, die nicht liefern konnten. Darauf kann man nicht planen (Annahme „Spillover“ = 0).</p>
+  <h2>2. Rechnung für P${PLAN}</h2>
+  ${tabelle([['A_wachstum', 'Marktwachstum (Wirtschaftsnachrichten)'], ['A_konk_preis', `Ø-Preis Konkurrenz P${PLAN} (Annahme)`], ['M_konkpreis'], ['F_preis', 'Unser Preis'], ['F_werbung', 'Unsere Werbung'], ['A_konk_werbung'], ['F_vertrieb', 'Unser Vertrieb'], ['A_konk_vertrieb'], ['A_eigenfaktor'], ['nachfrage_modell'], ['nachfrage_pess'], ['nachfrage_opt'], ['absatz'], ['ungedeckt']], { szen: false })}
   <h2 style="margin-top:14px">3. Preis gegen Nachfrage (Basis, alles andere wie eingegeben)</h2>`;
   const preise = []; for (let p = 2900; p <= 3400; p += 50) preise.push(p);
   const verfM1 = res.v('verfuegbar') - res.v('ga_lief');
@@ -368,7 +390,7 @@ function plan() {
   return `<p>Die Planwerte gehen in die <b>Planungsqualität</b> (TNB17) ein: 50 % Absatz, 25 % EK-Rendite, 25 % operativer Cashflow. Sie beeinflusst Rating und Aktienkurs. Am besten trägt man die Werte der Basis-Simulation ein.</p>
   <table><tr><th>Planwert</th><th>pessimistisch</th><th>Basis</th><th>optimistisch</th><th>euer Planwert</th></tr>
   ${rows.map(([l, k, bv, pv, ov, ein, d]) => `<tr class="klick" data-rw="${k}"><td>${l}</td><td>${fz(pv, d)}</td><td><b>${fz(bv, d)}</b></td><td>${fz(ov, d)}</td><td>${fz(ein, d)}</td></tr>`).join('')}</table>
-  <p>Erwartete Planungsqualität mit euren Planwerten: <b>${fz(b.v('pq'), 1)} Punkte</b> (P1: 86,33). <button class="knopf voll" id="planueb2">Planwerte = Basis übernehmen</button></p>
+  <p>Erwartete Planungsqualität mit euren Planwerten: <b>${fz(b.v('pq'), 1)} Punkte</b> ${IST ? `(tatsächlich: <b>${fz(IST.pq, 2)}</b>)` : `(P1: ${fz(IST1.pq, 2)})`}. <button class="knopf voll" id="planueb2">Planwerte = Basis übernehmen</button></p>
   <div class="hinweisbox">Wenn der Absatz durch die Fertigung begrenzt ist (wie bei der aktuellen Vorbelegung), ist der Absatz-Planwert fast sicher. Unsicher bleiben dann vor allem Kosten in Personal und Material, also EKR und OCF in kleinem Umfang.</div>
   <h2 style="margin-top:12px">Auslastungsziele (bewertete Aufgabe)</h2>
   <p>Erwartete Auslastung Anlagen <b>${fz(b.v('ausl_anl'), 2)} %</b>, Personal <b>${fz(b.v('ausl_pers'), 2)} %</b>. Die Anlagenauslastung ist eine reine Spielregel-Rechnung (Fertigung / Kapazität) und damit exakt, solange ihr die Fertigung vorgebt. Die Personalauslastung hängt an Fluktuation, Fehlzeiten und Produktivität. Im Backtest P1 lag das Modell dort ${fz(Math.abs(bt().r.v('ausl_pers') - IST1.ausl_pers), 1)} %-Punkte daneben (Reiter „Backtest P1“).</p>`;
@@ -376,6 +398,7 @@ function plan() {
 document.addEventListener('click', ev => { if (ev.target.id === 'planueb2') planUebernehmen(); });
 
 function aus() {
+  if (!N.ausschreibung_menge) return `<p>In Periode ${PLAN} gab es keine Ausschreibung.</p>`;
   const b = res, gebot = +F.aus_preis;
   const es = N.es_preise[1] / A.wa_index, lohnStk = N.gehalt.fe * (1 + F.pnk / 100 + 0.05) / b.v('produktivitaet');
   const varK = es + N.betriebsstoff + lohnStk + +A.nacharbeit;
@@ -414,17 +437,17 @@ function backtest() {
 
 function news() {
   const z = [['Marktwachstum', N.wachstum_text, `Szenarien ${N.wachstum.map(x => fz(x * 100) + ' %').join(' / ')}`],
-    ['Einsatzstoffe', 'Preissteigerung ca. 3 %', `Staffel ${N.es_preise.map(fz).join(' / ')} €; Nachlieferung ${fz(N.es_preise[0] * 1.2)} €`],
-    ['Löhne', N.gehalt_text, Object.entries(N.gehalt).map(([k, x]) => `${k.toUpperCase()} ${fz(x / 1000)} T€`).join(', ')],
-    ['Einstellungskosten', 'steigen auf 14.000 EUR', 'je Einstellung, auch für Ersatz der Fluktuation'],
-    ['Zinsen', N.zins_text, `kurz ${fz(res.v('zins_kurz'), 1)} %, lang ${fz(res.v('zins_lang'), 1)} %, Überziehung ${fz(res.v('zins_ueberz'), 1)} % (inkl. Ratingeffekt BBB: −1 %-Punkt)`],
-    ['Wertpapiere', N.zins_wp_text, fz(N.zins_wp * 100, 1) + ' % (Schätzung)'],
-    ['Betriebsstoffe', N.betriebsstoff_text, fz(N.betriebsstoff) + ' €/Stück'],
-    ['Großabnehmer', 'MEGRO nimmt bis 8.000 Stück', `${fz(N.ga_preis)} €/Stück, Zahlung sofort, kein Transport`],
-    ['Ausschreibung', N.ausschreibung_text, 'Reiter „Ausschreibung P3“'],
-    ['Sonderangebot', N.anlagen_text, 'Formular: Fertigungsanlagen → Typ C'],
-    ['Konjunktur', N.konj_text, 'nur indirekt (Lebenshaltung +2 % → Annahme Konkurrenzpreis +2 %)']];
-  return `<table><tr><th>Thema</th><th style="text-align:left">Wirtschaftsnachricht P2</th><th style="text-align:left">so im Modell</th></tr>${z.map(([a, b, c]) => `<tr><td>${a}</td><td style="text-align:left">${b}</td><td style="text-align:left">${c}</td></tr>`).join('')}</table>`;
+    ['Einsatzstoffe', N.es_text || '', `Staffel ${N.es_preise.map(fz).join(' / ')} €; Nachlieferung ${fz(N.es_preise[0] * 1.2)} €`],
+    ['Löhne', N.gehalt_text || '', Object.entries(N.gehalt).map(([k, x]) => `${k.toUpperCase()} ${fz(x / 1000)} T€`).join(', ')],
+    ['Einstellungskosten', '', `${fz(N.einstellung)} € je Einstellung (auch Ersatz der Fluktuation)`],
+    ['Zinsen', N.zins_text || '', `kurz ${fz(res.v('zins_kurz'), 1)} %, lang ${fz(res.v('zins_lang'), 1)} %, Überziehung ${fz(res.v('zins_ueberz'), 1)} % (inkl. Ratingeffekt ${stand.rating[0]})`],
+    ['Wertpapiere', N.zins_wp_text || '', fz(N.zins_wp * 100, 1) + ' %'],
+    ['Betriebsstoffe', N.betriebsstoff_text || '', fz(N.betriebsstoff) + ' €/Stück'],
+    ['Großabnehmer', '', N.ga_max ? `bis ${fz(N.ga_max)} Stück à ${fz(N.ga_preis)} €, Zahlung sofort, kein Transport` : 'keiner'],
+    ['Ausschreibung', N.ausschreibung_text || '', N.ausschreibung_menge ? `Reiter „Ausschreibung P${PLAN + 1}“` : 'keine'],
+    ['Anlagen', N.anlagen_text || '', `A ${fz(N.anlagen_preis.A)} / B ${fz(N.anlagen_preis.B)} / C ${fz(N.anlagen_preis.C, 1)} MEUR`],
+    ['Konjunktur', N.konj_text || '', '']].filter(r => r[1] || r[2]);
+  return `<table><tr><th>Thema</th><th style="text-align:left">Wirtschaftsnachricht P${PLAN}</th><th style="text-align:left">so im Modell</th></tr>${z.map(([a, b, c]) => `<tr><td>${a}</td><td style="text-align:left">${b}</td><td style="text-align:left">${c}</td></tr>`).join('')}</table>`;
 }
 
 // =============================================================================================

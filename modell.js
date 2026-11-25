@@ -260,7 +260,8 @@ export function rechne(stand, N, F, A, opt = {}) {
   def('k_umw', 'Umweltabgabe', 'MEUR', interp(umwInd, TAB.ua), { s: 'kalib', d: ['umw_ind'], q: TAB.ua.q, f: `Tabelle bei Index ${fz(umwInd, 2)}` });
 
   // =========================== NACHFRAGE UND ABSATZ ===========================
-  const mf = ms || { c: Math.log(W(stand.vorperiode.potentiell) || 1), e: -2.5, w: 0, v: 0 };
+  const pv0 = W(stand.vorperiode.potentiell) || 1;
+  const mf = ms || { c: Math.log(pv0), e: -2.5, w: 2000 / pv0, v: 200 / pv0 };
   const nb = nachfrage(stand, A, F, mf, 'basis');
   def('M_konkpreis', 'Ø-Marktpreis P' + per + ' (alle 6, inkl. uns)', 'EUR', nb.pq, { s: 'schaetz', d: ['F_preis', 'A_konk_preis'], f: `(${fz(n(F.preis))} + 5 × ${fz(nb.kp)}) / 6` });
   def('M_elast', 'Preiselastizität (aus Marktdaten P' + stand.periode + ')', '', mf.e, { s: 'kalib', q: 'Regression über die 6 Unternehmen im TNB02 (Reiter Nachfrage)', f: `${fz(mf.e, 2)}: 1 % teurer als der Markt ≈ ${fz(-mf.e, 1)} % weniger Nachfrage` });
